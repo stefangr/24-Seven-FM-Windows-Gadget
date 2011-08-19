@@ -1,1 +1,28 @@
-Dummy readme file. For now.
+#What is this
+A 'Windows gadget' (also known as 'Vista Sidebar Gadget' or 'Windows Desktop
+Gadget') is a kind of widget for Windows Vista and Windows 7.
+
+This gadget tells you what the internet radio stations of 24 Seven FM are
+playing at the moment.
+It also alows you to listen to the streams from the desktop (without windows
+media player or any other media player active).
+
+#Howto create the gadget
+
+Create a zip file from the sources.
+Make sure the gadget.xml is in the root of the zip file.
+Rename the file from .zip to .gadget
+Doubleclick on the gadget file.
+
+#More information
+Gadget info
+http://windows.microsoft.com/en-US/windows/downloads/personalize/gadgets
+
+Gadget gallery
+http://gallery.live.com/results.aspx?c=0&bt=1&pl=1&st=5
+
+Documentation on gadgets
+http://msdn.microsoft.com/en-us/library/dd834142.aspx
+
+24SevenFM
+http://24seven.fm/

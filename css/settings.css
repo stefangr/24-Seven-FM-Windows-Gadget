@@ -1,0 +1,38 @@
+﻿/**
+ * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * 
+ * This gadget is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this gadget. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * $Id: settings.css 14 2008-12-24 14:27:01Z stefan.grootscholten $
+ */
+
+body {
+	margin: 0px;
+	width: 220px;
+	height: 250px;
+}
+
+#audioFormat {
+	font-weight: bold;
+	margin-top: 8px;
+}
+
+#defStationTitle {
+	font-weight: bold;
+}
+
+#updateFrequency {
+	font-weight: bold;
+	margin-top: 8px;
+}

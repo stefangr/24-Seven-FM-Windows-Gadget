@@ -1,0 +1,392 @@
+﻿/**
+ * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * 
+ * This gadget is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this gadget. If not, see <http://www.gnu.org/licenses/>. 
+ * 
+ * $Id: main.css 6 2008-10-07 07:40:15Z stefan.grootscholten $
+ */
+
+body {
+	width: 130px;
+	height: 150px;
+	margin: 0px;
+	padding: 0px;
+}
+
+img {
+	border: 0px;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+#mainbackground {
+	width: 100%;
+	padding: 3px 4px 4px 3px;
+	font: 9pt "Segoe UI";
+}
+
+.infoIcon {
+	width: 20px;
+	height: 80px;
+	margin-left: 3px;
+	float: left;
+}
+
+#busyIcon {
+	font-size: 0px;
+	width: 16px;
+	height: 16px;
+	background-image: url(/img/busy_ani.png);
+	background-position-y: top;
+}
+
+.docked #minibar {
+	display: block;
+}
+
+.undocked #minibar {
+	display: none;
+}
+
+#minitabs {
+	position: absolute;
+	top: 6px;
+	right: 8px;
+	border: 1px solid #666;
+	padding: 2px 1px;
+	background-color: white;
+	font-family: "Calibri";
+}
+
+#tabopen {
+	float: right;
+	margin: 4px 4px;
+}
+
+#minititle {
+	text-align: center;
+}
+
+.docked #bigtitle {
+	display: none;
+}
+
+.undocked #bigtitle {
+	width: 100%;
+	text-align: center;
+	height: 23px;
+	font-size: 11pt;
+}
+
+.docked #bigtabs {
+	display: none;
+}
+
+.undocked #bigtabs {
+	height: 20px;
+}
+
+#bar2.undocked {
+	float: left;
+	width: 50px;
+}
+
+#cover {
+	float: left;
+}
+
+.docked #butcd {
+	float: left;
+	height: 40px;
+}
+
+.undocked #butcd {
+	clear: left;
+}
+
+.docked #countdownTimer {
+	float: right;
+	width: 80px;
+	height: 20px;
+	text-align: center;
+}
+
+.undocked #countdownTimer {
+	clear: left;
+	float: left;
+	height: 20px;
+	width: 100%;
+	text-align: center;
+}
+
+.docked #buttons {
+	clear: right;
+	float: right;
+	width: 80px;
+	height: 20px;
+	padding-left: 3px;
+}
+
+.undocked #buttons {
+	clear: left;
+	float: left;
+	height: 20px;
+	padding-left: 3px;
+}
+
+.docked #updateButton {
+	float: right;
+	width: 15px;
+}
+
+.docked #radioButtons {
+	float: right;
+	padding-right: 5px;
+}
+
+.undocked #radioButtons {
+	height: 20px;
+	width: 50px;
+}
+
+.docked .playdiv {
+	float: left;
+	padding-right: 3px;
+}
+
+.undocked .playdiv {
+	float: left;
+	padding-right: 3px;
+}
+
+.docked .stopdiv {
+	float: left;
+	padding-right: 3px;
+}
+
+.undocked .stopdiv {
+	float: left;
+	padding-right: 3px;
+}
+
+.docked .mutediv {
+	float: left;
+}
+
+.undocked .mutediv {
+	float: left;
+}
+
+#normalview {
+	display: none;
+}
+
+#busyview {
+	display: none;
+}
+
+#errorview {
+	display: none;
+}
+
+.docked #albumtitle {
+	height: 16px;
+	overflow: hidden;
+}
+
+.docked #artistname {
+	height: 16px;
+	overflow: hidden;
+}
+
+.docked #tracktitle {
+	height: 48px;
+	overflow: hidden;
+}
+
+.station80s {
+	color: #FFFFEE;
+}
+
+.station80s #minitabs {
+	background-color: #66334c;
+	border-color: #cc6699;
+}
+
+.station80s a {
+	color: #FF99CC;
+}
+
+.station80s a:visited {
+	color: #FF99CC;
+}
+
+.station80s a:active {
+	color: #66FFFF;
+}
+
+.station80s a:hover {
+	color: #66FFFF;
+}
+
+.station80s .tab_80s {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.stationafm {
+	color: #FFFFEE;
+}
+
+.stationafm #minitabs {
+	background-color: #664d33;
+	border-color: #cc9966;
+}
+
+.stationafm a {
+	color: #FFCC99;
+}
+
+.stationafm a:visited {
+	color: #FFCC99;
+}
+
+.stationafm a:active {
+	color: #FFFFFF;
+}
+
+.stationafm a:hover {
+	color: #FFFFFF;
+}
+
+.stationafm .tab_afm {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.stationdfm {
+	color: #FFFFFF;
+}
+
+.stationdfm #minitabs {
+	background-color: #222222;
+	border-color: #555555;
+}
+
+.stationdfm a {
+	color: #FF0000;
+}
+
+.stationdfm a:visited {
+	color: #FF0000;
+}
+
+.stationdfm a:active {
+	color: #FFFFFF;
+}
+
+.stationdfm a:hover {
+	color: #FFFFFF;
+}
+
+.stationdfm .tab_dfm {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.stationefm {
+	color: #FFFFEE;
+}
+
+.stationefm #minitabs {
+	background-color: #666633;
+	border-color: #cccc66;
+}
+
+.stationefm a {
+	color: #FFFF66;
+}
+
+.stationefm a:visited {
+	color: #FFFF66;
+}
+
+.stationefm a:active {
+	color: #FFFFFF;
+}
+
+.stationefm a:hover {
+	color: #FFFFFF;
+}
+
+.stationefm .tab_efm {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.stationsst {
+	color: #FFFFEE;
+}
+
+.stationsst #minitabs {
+	background-color: #333366;
+	border-color: #6666cc;
+}
+
+.stationsst a {
+	color: #99CCFF;
+}
+
+.stationsst a:visited {
+	color: #99CCFF;
+}
+
+.stationsst a:active {
+	color: #FFFF66;
+}
+
+.stationsst a:hover {
+	color: #FFFF66;
+}
+
+.stationsst .tab_sst {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+#mtab_80s, #btab_80s {
+	color: #FF99CC;
+}
+
+#mtab_afm, #btab_afm {
+	color: #FFCC99;
+}
+
+#mtab_dfm, #btab_dfm {
+	color: #FF0000;
+}
+
+#mtab_efm, #btab_efm {
+	color: #FFFF66;
+}
+
+#mtab_sst, #btab_sst {
+	color: #99CCFF;
+}

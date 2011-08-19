@@ -1,0 +1,147 @@
+﻿/**
+ * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * 
+ * This gadget is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this gadget. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * $Id: flyout.css 6 2008-10-07 07:40:15Z stefan.grootscholten $
+ */
+
+body {
+	width: 130px;
+	height: 150px;
+	margin: 0px;
+	padding: 0px;
+}
+
+img {
+	border: 0px;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+#flyoutBackground {
+	width: 100%;
+	padding: 3px 4px 4px 4px;
+	font: 9pt "Segoe UI";
+}
+
+#updatetitle {
+	font-weight: bold;
+}
+
+.station80s {
+	color: #FFFFEE;
+}
+
+.station80s a {
+	color: #FF99CC;
+}
+
+.station80s a:visited {
+	color: #FF99CC;
+}
+
+.station80s a:active {
+	color: #66FFFF;
+}
+
+.station80s a:hover {
+	color: #66FFFF;
+}
+
+.stationafm {
+	color: #FFFFEE;
+}
+
+.stationafm a {
+	color: #FFCC99;
+}
+
+.stationafm a:visited {
+	color: #FFCC99;
+}
+
+.stationafm a:active {
+	color: #FFFFFF;
+}
+
+.stationafm a:hover {
+	color: #FFFFFF;
+}
+
+.stationdfm {
+	color: #FFFFFF;
+}
+
+.stationdfm a {
+	color: #FF0000;
+}
+
+.stationdfm a:visited {
+	color: #FF0000;
+}
+
+.stationdfm a:active {
+	color: #FFFFFF;
+}
+
+.stationdfm a:hover {
+	color: #FFFFFF;
+}
+
+.stationefm {
+	color: #FFFFEE;
+}
+
+.stationefm a {
+	color: #FFFF66;
+}
+
+.stationefm a:visited {
+	color: #FFFF66;
+}
+
+.stationefm a:active {
+	color: #FFFFFF;
+}
+
+.stationefm a:hover {
+	color: #FFFFFF;
+}
+
+.stationsst {
+	color: #FFFFEE;
+}
+
+.stationsst a {
+	color: #99CCFF;
+}
+
+.stationsst a:visited {
+	color: #99CCFF;
+}
+
+.stationsst a:active {
+	color: #FFFF66;
+}
+
+.stationsst a:hover {
+	color: #FFFF66;
+}

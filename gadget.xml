@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<gadget>
+	<name>24Seven.FM Radio</name>
+	<version>1.53</version>
+	<author name="Stefan Grootscholten">
+		<info url="http://sites.google.com/site/24sevenfmgadgetswidgets/vista-sidebar-gadget?ref=info&amp;lang=int" text="24Seven.FM Gadgets &amp; Widgets" />
+	</author>
+	<copyright>&#169; 2008 - 2010</copyright>
+	<description>Listen to one of the stations of 24Seven.FM and view the trackinformation</description>
+	<icons>
+		<icon height="64" width="64" src="icon.png" />
+	</icons>
+	<hosts>
+		<host name="sidebar">
+			<base type="HTML" apiVersion="1.0.0" src="main.html" />
+			<permissions>Full</permissions>
+			<platform minPlatformVersion="1.0" />
+			<defaultImage src="largeIcon.png"></defaultImage>
+		</host>
+	</hosts>
+</gadget>

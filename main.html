@@ -1,0 +1,101 @@
+﻿<!--
+ * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * 
+ * This gadget is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this gadget. If not, see <http://www.gnu.org/licenses/>. 
+ * 
+ * $Id: main.html 6 2008-10-07 07:40:15Z stefan.grootscholten $
+-->
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<script type="text/javascript" src="js/main.js"></script>
+	<script type="text/javascript" src="js/stationObject.js"></script>
+	<script type="text/javascript" src="js/playerObject.js"></script>
+	<script type="text/javascript" src="js/countdownObject.js"></script>
+	<script type="text/javascript" src="js/updateObject.js"></script>
+	<script type="text/javascript" src="js/language.js"></script>
+	<script type="text/javascript" src="js/EventManager.js"></script>
+	<link rel="stylesheet" href="css/main.css" type="text/css" />
+</head>
+<body onload="init()">
+	<g:background id="mainbackground">
+		<div id="bar1">
+			<div id="minitabs"></div>
+			<div id="bigtabs"></div>
+			<div id="minibar">
+				<div id="tabopen">
+					<a href="#" id="tabopenlink">
+						<img src="/img/menu_down.png" width="9" height="9" alt="" />
+					</a>
+				</div>
+				<div id="minititle"></div>
+			</div>
+			<div id="bigtitle"></div>
+		</div>
+		<div id="bar2">
+			<div id="cover"></div>
+			<div id="butcd">
+				<div id="countdownTimer"></div>
+				<div id="buttons">
+					<div id="updateButton">
+						<div id="updateenabled" class="updatediv">
+							<a href="#" id="updateButton" title="">
+								<img src="/img/update/enabled.png" width="13" height="13" alt="" id="updateImage" />
+							</a>
+						</div>
+						<div id="updatedisabled" class="updatediv">
+							<img src="/img/update/disabled.png" width="13" height="13" alt="" />
+						</div>
+					</div>
+					<div id="radioButtons">
+						<div id="playenabled" class="playdiv"></div>
+						<div id="playdisabled" class="playdiv"></div>
+						<div id="stopenabled" class="stopdiv"></div>
+						<div id="stopdisabled" class="stopdiv"></div>
+						<div id="muteenabled" class="mutediv"></div>
+						<div id="mutedisabled" class="mutediv"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="content">
+			<div id="introview">
+				<div id="introText"></div>
+			</div>
+			<div id="normalview">
+				<div id="albumtitle"></div>
+				<div id="artistname"></div>
+				<div id="tracktitle"></div>
+			</div>
+			<div id="busyview">
+				<div class="infoIcon">
+					<div id="busyIcon"></div>
+				</div>
+				<span id="busyText"></span>
+			</div>
+			<div id="errorview">
+				<div class="infoIcon">
+					<img src="/img/information.png" alt="" id="errorIcon" />
+				</div>
+				<span id="errortext"></span>
+			</div>
+		</div>
+	</g:background>
+	<object id="WMPObject" width="0" height="0" classid="CLSID:6BF52A52-394A-11D3-B153-00C04F79FAA6" type="application/x-oleobject">
+		<param name="uimode" value="invisible" />
+		<param name="SendPlayStateChangeEvents" value="true" />
+	</object>
+</body>
+</html>

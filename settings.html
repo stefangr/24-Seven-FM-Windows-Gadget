@@ -1,0 +1,83 @@
+﻿<!--
+ * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * 
+ * This gadget is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this gadget. If not, see <http://www.gnu.org/licenses/>. 
+ * 
+ * $Id: settings.html 14 2008-12-24 14:27:01Z stefan.grootscholten $
+-->
+
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="js/settingsObject.js"></script>
+	<script type="text/javascript" src="js/language.js"></script>
+	<link rel="stylesheet" href="css/settings.css" type="text/css" />
+	<script type="text/javascript">
+	<!--
+function loadSettings()
+{
+	var settings = new Settings();
+}
+	// -->
+	</script>
+</head>
+<body onload="loadSettings();">
+	<div id="defStationTitle"></div>
+	<select name="DefStation" id="DefStation" title="">
+		<option value="0"></option>
+		<option value="1">Streaming Soundtracks.com</option>
+		<option value="2">Death.FM</option>
+		<option value="3">Entranced.FM</option>
+		<option value="4">1980s.FM</option>
+		<option value="5">Adagio.FM</option>
+	</select>
+	<div>
+		<label for="countdown" id="countdowntitle" title="">
+			<input type="checkbox" name="countdown" id="countdown" value="1" /> <span id="countdownLabel"></span>
+		</label>
+	</div>
+	<div>
+		<label for="miniRadio" id="miniradiotitle" title="">
+			<input type="checkbox" name="miniRadio" id="miniRadio" value="1" /> <span id="miniRadioLabel"></span>
+		</label>
+	</div>
+	<div id="audioFormat"></div>
+	<div>
+		<label for="formatWMP" title="Windows Media Audio (32 kbps)">
+			<input type="radio" name="format" id="formatWMP" value="WMP" /> Windows Media Audio (32 kbps)
+		</label><br />
+		<!--label for="formatWMPHi" title="Windows Media Audio (64 kbps)">
+			<input type="radio" name="format" id="formatWMPHi" value="WMPHi" /> Windows Media Audio (64 kbps)
+		</label><br /-->
+		<label for="formatWMPHd" title="Windows Media Audio (128 kbps)">
+			<input type="radio" name="format" id="formatWMPHd" value="WMPHd" /> Windows Media Audio (128 kbps)
+		</label><br />
+		<!--label for="formatLo" title="aac Plus (32 kbps)">
+			<input type="radio" name="format" id="formatLo" value="Lo" /> aacPlus (32 kbps) <sup>*</sup>
+		</label><br />
+		<label for="formatHi" title="aac Plus (64 kbps)">
+			<input type="radio" name="format" id="formatHi" value="Hi" /> aacPlus (64 kbps) <sup>*</sup>
+		</label><br />
+		<span><sup>*</sup> <a href="http://www.orban.com/plugin/" id="pluginText"></a></span-->
+	</div>
+	<div id="updateFrequency"></div>
+	<select name="updateFreq" id="frequency" title="">
+		<option value="startup" id="updatestartup"></option>
+		<option value="day" id="updateday"></option>
+		<option value="week" id="updateweek"></option>
+		<option value="month" id="updatemonth"></option>
+		<option value="never" id="updatenever"></option>
+	</select>
+</body>
+</html>
