@@ -29,7 +29,6 @@ function IR247fm()
 	this.miniRadioActive = true;
 	
 	this.language = new Language();
-	this.miniRadio = new MiniPlayer();
 	this.stations = [];
 	this.spinnerInterval = null;
 	this.stations[0] = new Station("24Seven.FM", "247", "247.png", "", "");
@@ -115,7 +114,7 @@ IR247fm.prototype.init = function ()
 	document.getElementById("minitabs").style.display = 'none';
 	document.getElementById("updateenabled").style.display = 'none';
 	
-	this.miniRadio.setLanguage(this.language);
+	MiniPlayer.getInstance().setLanguage(this.language);
 	this.initTabs();
 	this.readSettings();
 	
@@ -193,11 +192,11 @@ IR247fm.prototype.readSettings = function ()
 	var miniRadioSetting = System.Gadget.Settings.readString("SettingsMiniRadio");
 	if (miniRadioSetting !== "") {
 		this.miniRadioActive = false;
-		this.miniRadio.setActive(false);
+		MiniPlayer.getInstance().setActive(false);
 	} else {
 		this.miniRadioActive = true;
 		if (this.curstation !== 0) {
-			this.miniRadio.setActive(true);
+			MiniPlayer.getInstance().setActive(true);
 		}
 	}
 	var audioFormat = System.Gadget.Settings.readString("SettingsAudioFormat");
@@ -234,7 +233,7 @@ IR247fm.prototype.setStation = function (station, init)
 		}
 		if (this.miniRadioActive && this.curstation !== 0)
 		{
-			this.miniRadio.setURL(this.stations[this.curstation].getAudioURL());
+			MiniPlayer.getInstance().setURL(this.stations[this.curstation].getAudioURL());
 		}
 		if (this.countdownActive && this.curstation !== 0)
 		{
