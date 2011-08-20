@@ -31,7 +31,6 @@ function IR247fm()
 	this.updatecheck = new UpdateCheck();
 	this.language = new Language();
 	this.miniRadio = new MiniPlayer();
-	this.countdown = new CountDown();
 	this.stations = [];
 	this.spinnerInterval = null;
 	this.stations[0] = new Station("24Seven.FM", "247", "247.png", "", "");
@@ -127,7 +126,6 @@ IR247fm.prototype.init = function ()
 	for (var x = 1; x < this.stations.length; x++)
 	{
 		this.stations[x].setLanguage(this.language);
-		this.stations[x].setCountdown(this.countdown);
 		EventManager.Add("mtab_" + this.stations[x].getShortname().toLowerCase(), "click", function () {
 			var e = window.event;
 			e.cancelBubble = true;
@@ -186,11 +184,11 @@ IR247fm.prototype.readSettings = function ()
 	var countDownSetting = System.Gadget.Settings.readString("SettingsCountdown");
 	if (countDownSetting !== "") {
 		this.countdownActive = false;
-		this.countdown.setActive(false);
+		Countdown.getInstance().setActive(false);
 	} else {
 		this.countdownActive = true;
 		if (this.curstation !== 0 && ! this.stations[this.curstation].isCommercial()) {
-			this.countdown.setActive(true);
+			Countdown.getInstance().setActive(true);
 		}
 	}
 	var miniRadioSetting = System.Gadget.Settings.readString("SettingsMiniRadio");
@@ -241,7 +239,7 @@ IR247fm.prototype.setStation = function (station, init)
 		}
 		if (this.countdownActive && this.curstation !== 0)
 		{
-			this.countdown.setActive(true);
+			Countdown.getInstance().setActive(true);
 		}
 		this.updatecheck.setFlyoutBackground(this.stations[this.curstation].getFlyoutBackground());
 		this.updatecheck.setFlyoutClassName(this.stations[this.curstation].getFlyoutClassName());

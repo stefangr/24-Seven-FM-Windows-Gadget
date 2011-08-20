@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * Copyright (C) 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
  * 
  * This gadget is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,71 +17,127 @@
  * $Id: countdownObject.js 6 2008-10-07 07:40:15Z stefan.grootscholten $
  */
 
-/**
- * Constructor for the countdown object
- */
-function CountDown()
-{
-	this.active = true;
-	this.time = 0;
-	this.cdInterval = null;
-	this.cdTimer = null;
-}
-
-/**
- * Set the endtime to countdown to
- * 
- * @param	integer	time
- * @return	void
- */
-CountDown.prototype.setEndtime = function (time)
-{
-	this.time = time;
-};
-
-/**
- * Set the countdown to active
- * 
- * @param	boolean	active
- * @return	void
- */
-CountDown.prototype.setActive = function (active)
-{
-	this.active = active;
-	if (! active)
-	{
-		document.getElementById("countdownTimer").innerHTML = "";
-		if (this.cdInterval !== null)
-		{
-			clearInterval(this.cdInterval);
-			this.cdInterval = null;
+var Countdown = (function() {
+	/**
+	 * Instance of a Countdown
+	 * 
+	 * @var Countdown
+	 */
+	var instance;
+	
+	/**
+	 * Initialize the Countdown
+	 * 
+	 * @return Countdown
+	 */
+	function init() {
+		/**
+		 * Is the countdown active
+		 * 
+		 * @var boolean
+		 */
+		var active = true;
+		
+		/**
+		 * End time of the countdown
+		 * 
+		 * @var integer
+		 */
+		var time = 0;
+		
+		/**
+		 * Interval ID
+		 * 
+		 * @var integer
+		 */
+		var cdInterval = null;
+		
+		/**
+		 * Activate/Deactivate the countdown timer
+		 * 
+		 * @param boolean newactive
+		 */
+		function activate(newactive) {
+			active = newactive;
+			if (! newactive) {
+				document.getElementById('countdownTimer').innerHTML = '';
+				if (cdInterval !== null) {
+					clearInterval(cdInterval);
+					cdInterval = null
+				}
+			} else {
+				if (cdInterval === null) {
+					cdInterval = setInterval(
+						function() {
+							var now = new Date();
+							var diff = parseInt((Countdown.getInstance().getTime() - now.getTime()) / 1000, 10);
+							if (diff < 0 || ! Countdown.getInstance().getActive()) {
+								document.getElementById('countdownTimer').innerHTML = '';
+								if (! Countdown.getInstance().getActive()) {
+									return;
+								}
+							} else {
+								var hour = parseInt(diff / 3600, 10);
+								var minute = parseInt((diff - 3600 * hour) / 60, 10);
+								var second = diff - 3600 * hour - 60 * minute;
+								document.getElementById('countdownTimer').innerHTML = (hour > 0 ? hour + ':' : '') + ((hour > 0 && minute < 10) ? '0' : '') + minute + ':' + (second < 10 ? '0' : '') + second;
+							}
+						},
+						995
+					);
+				}
+			}
+		}
+		/**
+		 * Return public functions and variables
+		 */
+		return {
+			/**
+			 * Set the new end time
+			 * 
+			 * @param integer newtime
+			 */
+			setEndtime: function(newtime) {
+				time = newtime;
+			},
+			/**
+			 * Get the currently set time
+			 * 
+			 * @return integer
+			 */
+			getTime: function() {
+				return time;
+			},
+			/**
+			 * Enable/Disable the Countdown
+			 * 
+			 * @param boolean active
+			 */
+			setActive: function(newactive) {
+				activate(newactive);
+			},
+			/**
+			 * Return the activity state
+			 * 
+			 * @return boolean
+			 */
+			getActive: function() {
+				return active;
+			}
 		}
 	}
-	else
-	{
-		if (this.cdInterval === null)
-		{
-			var cdObj = this;
-			this.cdInterval = setInterval(
-				function () {
-					var now = new Date();
-					var diff = parseInt((cdObj.time - now.getTime()) / 1000, 10);
-					if (diff < 0 || ! cdObj.active)
-					{
-						document.getElementById("countdownTimer").innerHTML = "";
-						if (! cdObj.active)
-						{
-							return;
-						}
-					}
-					else
-					{
-						var hour = parseInt(diff / 3600, 10);
-						var minute = parseInt((diff - 3600 * hour) / 60, 10);
-						var second = diff - 3600 * hour - 60 * minute;
-						document.getElementById("countdownTimer").innerHTML = (hour > 0 ? hour + ":" : "") + ((hour > 0 && minute < 10) ? "0" : "") + minute + ":" + (second < 10 ? "0" : "") + second;
-					}
-				}, 995);
+	
+	return {
+		/**
+		 * Get the single instance of Countdown
+		 * 
+		 * @return Countdown
+		 */
+		getInstance: function() {
+			if (! instance) {
+				instance = init();
+			}
+			return instance;
 		}
 	}
-};
+})();

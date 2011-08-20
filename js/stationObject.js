@@ -39,7 +39,6 @@ function Station(name, shortname, logo, url, listenurl)
 	this.listenercount = 0;
 	this.active = false;
 	this.language = null;
-	this.countdown = null;
 	this.trackTimer = null;
 	this.timeoutTimer = null;
 	this.album = "";
@@ -75,16 +74,6 @@ Station.prototype.setAudioformat = function (audioformat)
 Station.prototype.setLanguage = function (language)
 {
 	this.language = language;
-};
-
-/**
- * Set the countdown object
- * @param	Countdown	countdown
- * @return	void
- */
-Station.prototype.setCountdown = function (countdown)
-{
-	this.countdown = countdown;
 };
 
 /**
@@ -137,7 +126,7 @@ Station.prototype.enableStation = function ()
 	var now = new Date();
 	if (this.countdown !== null)
 	{
-		this.countdown.setEndtime(this.nextUpdate);
+		Countdown.getInstance().setEndtime(this.nextUpdate);
 	}
 	if (now.getTime() > this.nextUpdate)
 	{
@@ -466,7 +455,7 @@ Station.prototype.getSOAPdata = function ()
 			stObj.nextUpdate = now.getTime() + refresh * 1000;
 			if (! stObj.commercial)
 			{
-				stObj.countdown.setEndtime(stObj.nextUpdate);
+				Countdown.getInstance().setEndtime(stObj.nextUpdate);
 			}
 			stObj.trackTimer = setTimeout(function () {
 				station_getSoapData(stObj.shortname);
