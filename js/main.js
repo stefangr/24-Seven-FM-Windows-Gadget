@@ -28,7 +28,6 @@ function IR247fm()
 	this.countdownActive = true;
 	this.miniRadioActive = true;
 	
-	this.updatecheck = new UpdateCheck();
 	this.language = new Language();
 	this.miniRadio = new MiniPlayer();
 	this.stations = [];
@@ -140,7 +139,7 @@ IR247fm.prototype.init = function ()
 		});
 	}
 	
-	this.updatecheck.setLanguage(this.language);
+	UpdateCheck.getInstance().setLanguage(this.language);
 	this.setStation(this.defstation, true);
 	if (System.Gadget.docked) {
 		this.dock();
@@ -241,8 +240,8 @@ IR247fm.prototype.setStation = function (station, init)
 		{
 			Countdown.getInstance().setActive(true);
 		}
-		this.updatecheck.setFlyoutBackground(this.stations[this.curstation].getFlyoutBackground());
-		this.updatecheck.setFlyoutClassName(this.stations[this.curstation].getFlyoutClassName());
+		UpdateCheck.getInstance().setFlyoutBackground(this.stations[this.curstation].getFlyoutBackground());
+		UpdateCheck.getInstance().setFlyoutClassName(this.stations[this.curstation].getFlyoutClassName());
 		System.Gadget.endTransition(System.Gadget.TransitionType.morph, 1);
 	}
 };
