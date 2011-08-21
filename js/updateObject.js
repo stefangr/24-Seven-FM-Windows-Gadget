@@ -266,8 +266,6 @@ var UpdateCheck = (function() {
 					return;
 				}
 				newversion = d[0].getElementsByTagName('version')[0].innerHTML;
-				window.prompt('curversion', curversion);
-				window.prompt('curversion', parseFloat(curversion));
 				if (parseFloat(curversion) >= parseFloat(newversion)) {
 					return;
 				}
@@ -292,8 +290,6 @@ var UpdateCheck = (function() {
 					response.indexOf('<url>') + 5,
 					response.indexOf('</url>')
 				);
-				window.prompt('curversion', curversion);
-				window.prompt('curversion', parseFloat(curversion));
 				if (parseFloat(curversion) >= parseFloat(newversion)) {
 					return;
 				}
