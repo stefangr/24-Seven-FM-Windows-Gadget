@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <gadget>
 	<name>24Seven.FM Radio</name>
-	<version>1.53</version>
+	<version>1.60</version>
 	<author name="Stefan Grootscholten">
-		<info url="http://sites.google.com/site/24sevenfmgadgetswidgets/vista-sidebar-gadget?ref=info&amp;lang=en" text="24Seven.FM Gadgets &amp; Widgets" />
+		<info url="http://sites.google.com/site/24sevenfmgadgetswidgets/vista-sidebar-gadget?utm_source=infolink_english&amp;utm_medium=gadget&amp;utm_campaign=24sevenfmGadget" text="24Seven.FM Gadgets &amp; Widgets" />
 	</author>
-	<copyright>&#169; 2008 - 2010</copyright>
+	<copyright>&#169; 2008 - 2011</copyright>
 	<description>Listen to one of the stations of 24Seven.FM and view the trackinformation</description>
 	<icons>
 		<icon height="64" width="64" src="icon.png" />
