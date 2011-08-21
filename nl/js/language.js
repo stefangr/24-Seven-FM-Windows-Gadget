@@ -50,9 +50,6 @@ function Language()
 	this.noDefault = "Geen default station";
 	this.enableMiniradio = "Schakel mini radio in";
 	this.enableCountdown = "Schakel tijd teller in";
-	this.amazonAlbum = "Ondersteun dit station en koop het album '";
-	this.amazonArtist = "Ondersteun dit station en koop muziek van '";
-	this.amazonLink = "' bij Amazon.com.";
 	this.formatselect = "Selecteer het audio formaat";
 	this.pluginNeeded = "De Orban aacPlus plugin is vereist";
 	this.currentVersion = "Deze versie";

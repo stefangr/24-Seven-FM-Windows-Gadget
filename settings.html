@@ -20,14 +20,13 @@
 <html>
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	<script type="text/javascript" src="js/settingsObject.js"></script>
 	<script type="text/javascript" src="js/language.js"></script>
+	<script type="text/javascript" src="js/settingsObject.js"></script>
 	<link rel="stylesheet" href="css/settings.css" type="text/css" />
 	<script type="text/javascript">
 	<!--
-function loadSettings()
-{
-	var settings = new Settings();
+function loadSettings() {
+	Settings.init();
 }
 	// -->
 	</script>
@@ -54,22 +53,22 @@ function loadSettings()
 	</div>
 	<div id="audioFormat"></div>
 	<div>
-		<label for="formatWMP" title="Windows Media Audio (32 kbps)">
+		<!--label for="formatWMP" title="Windows Media Audio (32 kbps)">
 			<input type="radio" name="format" id="formatWMP" value="WMP" /> Windows Media Audio (32 kbps)
-		</label><br />
+		</label><br /-->
 		<!--label for="formatWMPHi" title="Windows Media Audio (64 kbps)">
 			<input type="radio" name="format" id="formatWMPHi" value="WMPHi" /> Windows Media Audio (64 kbps)
 		</label><br /-->
 		<label for="formatWMPHd" title="Windows Media Audio (128 kbps)">
 			<input type="radio" name="format" id="formatWMPHd" value="WMPHd" /> Windows Media Audio (128 kbps)
 		</label><br />
-		<!--label for="formatLo" title="aac Plus (32 kbps)">
+		<label for="formatLo" title="aac Plus (32 kbps)">
 			<input type="radio" name="format" id="formatLo" value="Lo" /> aacPlus (32 kbps) <sup>*</sup>
 		</label><br />
-		<label for="formatHi" title="aac Plus (64 kbps)">
+		<!--label for="formatHi" title="aac Plus (64 kbps)">
 			<input type="radio" name="format" id="formatHi" value="Hi" /> aacPlus (64 kbps) <sup>*</sup>
-		</label><br />
-		<span><sup>*</sup> <a href="http://www.orban.com/plugin/" id="pluginText"></a></span-->
+		</label><br /-->
+		<span><sup>*</sup> <a href="http://www.free-codecs.com/download/aac_aacplus_player_plugin.htm" id="pluginText"></a></span>
 	</div>
 	<div id="updateFrequency"></div>
 	<select name="updateFreq" id="frequency" title="">
