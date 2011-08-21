@@ -82,7 +82,7 @@ var SoapClient = (function() {
 				
 			case 'current':
 			default:
-				return '<GetCurrentlyPlaying xmlns="http://24seven.fm"><GetCover>true</GetCover></GetCurrentlyPlaying>';
+				return '<GetCurrentlyPlaying xmlns="http://24seven.fm"><GetCover>false</GetCover></GetCurrentlyPlaying>';
 			}
 		}
 		
@@ -118,6 +118,7 @@ var SoapClient = (function() {
 			} else if (null !== xmlTimeout) {
 				xmlHTTP.abort();
 				clearTimeout(xmlTimeout);
+				xmlHTTP.onreadystatechange = null;
 			}
 			
 			xmlHTTP.onreadystatechange = function() {
@@ -136,6 +137,7 @@ var SoapClient = (function() {
 					var xml = this.responseXML;
 					callback({status: 200, station: code, data: xml});
 				}
+				xmlHTTP.onreadystatechange = null;
 			};
 			
 			try {
@@ -152,6 +154,7 @@ var SoapClient = (function() {
 				xmlHTTP.setRequestHeader('Content-length', envelope.length);
 				xmlHTTP.send(envelope);
 			} catch (e) {
+				xmlHTTP.onreadystatechange = null;
 				clearTimeout(xmlTimeout);
 				callback({status: 400, station: code});
 			}

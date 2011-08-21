@@ -116,16 +116,16 @@ var UpdateCheck = (function() {
 				if (this.readyState === 4) {
 					if (this.status !== 200) {
 						// HTTP State is not OK
+						xhr.onreadystatechange = null;
 						return;
 					}
 					System.Gadget.Settings.writeString('LastUpdateCheck', time);
 					if (this.overrideMimeType) {
-						var xml = this.responseXML;
-						UpdateCheck.getInstance().parseXML(xml);
+						UpdateCheck.getInstance().parseXML(this.responseXML);
 					} else {
-						var response = this.responseText;
-						UpdateCheck.getInstance().parseText(response);
+						UpdateCheck.getInstance().parseText(this.responseText);
 					}
+					xhr.onreadystatechange = null;
 				}
 			};
 			try {
@@ -141,7 +141,9 @@ var UpdateCheck = (function() {
 					xhr.overrideMimeType('text/xml');
 				}
 				xhr.send(null);
-			} catch (e) {}
+			} catch (e) {
+				xhr.onreadystatechange = null;
+			}
 		}
 		
 		/**
