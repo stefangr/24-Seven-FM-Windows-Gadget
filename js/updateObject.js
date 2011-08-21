@@ -129,7 +129,7 @@ var UpdateCheck = (function() {
 				}
 			};
 			try {
-				xhr.open('GET', 'http://24seven-fm-gadgets.googlecode.com/files/24sevenfm_update.xml', 'true');
+				xhr.open('GET', 'https://raw.github.com/stefangr/24-Seven-FM-Windows-Gadget/master/24sevenfm_update.xml', 'true');
 				// Try 30 seconds to get the resource
 				setTimeout(function() {
 						xhr.abort();
