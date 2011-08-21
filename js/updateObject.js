@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * Copyright (C) 2008 - 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
  * 
  * This gadget is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ var UpdateCheck = (function() {
 		 * 
 		 * @var string
 		 */
-		var curversion = System.Gadget.version;
+		var curversion = '0.0';
 		
 		/**
 		 * Update URL
@@ -159,6 +159,7 @@ var UpdateCheck = (function() {
 				UpdateCheck.getInstance().openFlyout();
 				e.returnValue = false;
 			});
+			curversion = System.Gadget.version;
 			checkForUpdates();
 		}
 		
@@ -171,7 +172,7 @@ var UpdateCheck = (function() {
 			} else {
 				updateUrl += '&';
 			}
-			updateUrl += 'utm_source=update_' + language.name + '&utm_medium=gadget&utm_campaign=24sevenfmGadget&utm_content=' + curversion;
+			updateUrl += 'utm_source=update_' + language.name + '&amp;utm_medium=gadget&amp;utm_campaign=24sevenfmGadget&amp;utm_content=' + curversion;
 			document.getElementById('updatedisabled').style.display = 'none';
 			document.getElementById('updateenabled').style.display = 'block';
 		}
@@ -265,6 +266,8 @@ var UpdateCheck = (function() {
 					return;
 				}
 				newversion = d[0].getElementsByTagName('version')[0].innerHTML;
+				window.prompt('curversion', curversion);
+				window.prompt('curversion', parseFloat(curversion));
 				if (parseFloat(curversion) >= parseFloat(newversion)) {
 					return;
 				}
@@ -289,6 +292,8 @@ var UpdateCheck = (function() {
 					response.indexOf('<url>') + 5,
 					response.indexOf('</url>')
 				);
+				window.prompt('curversion', curversion);
+				window.prompt('curversion', parseFloat(curversion));
 				if (parseFloat(curversion) >= parseFloat(newversion)) {
 					return;
 				}

@@ -108,7 +108,7 @@ var SoapClient = (function() {
 		 * @param string action
 		 * @param function callback
 		 */
-		function performSoapRequest(url, action, callback) {
+		function performSoapRequest(url, action, code, callback) {
 			var body = getBody(action);
 			var soapAction = getSoapAction(action);
 			var envelope = getEnvelope(body);
@@ -131,10 +131,10 @@ var SoapClient = (function() {
 				}
 				
 				if (this.status != 200) {
-					callback({status: this.status});
+					callback({status: this.status, station: code});
 				} else {
 					var xml = this.responseXML;
-					callback({status: 200, data: xml});
+					callback({status: 200, station: code, data: xml});
 				}
 			};
 			
@@ -143,7 +143,7 @@ var SoapClient = (function() {
 				// Try for 30 seconds
 				xmlTimeout = setTimeout(function() {
 						xmlHTTP.abort();
-						callback({status: 503});
+						callback({status: 503, station: code});
 					},
 					30000
 				);
@@ -153,7 +153,7 @@ var SoapClient = (function() {
 				xmlHTTP.send(envelope);
 			} catch (e) {
 				clearTimeout(xmlTimeout);
-				callback({status: 400});
+				callback({status: 400, station: code});
 			}
 		}
 		
@@ -163,10 +163,11 @@ var SoapClient = (function() {
 			 * 
 			 * @param string url
 			 * @param string action
+			 * @param string code
 			 * @param function callback
 			 */
-			getData: function(url, action, callback) {
-				performSoapRequest(url, action, callback);
+			getData: function(url, action, code, callback) {
+				performSoapRequest(url, action, code, callback);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * Copyright (C) 2008 - 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
  * 
  * This gadget is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,320 +17,266 @@
  * $Id: main.js 6 2008-10-07 07:40:15Z stefan.grootscholten $
  */
 
-
-/**
- * Constructor for the 24 seven FM Object
- */
-function IR247fm()
-{
-	this.curstation = 0;
-	this.defstation = 0;
-	this.countdownActive = true;
-	this.miniRadioActive = true;
+var RadioGadget = (function() {
+	/**
+	 * Instance of the Radio Gadget
+	 * 
+	 * @var RadioGadget
+	 */
+	var instance = null;
 	
-	this.language = new Language();
-	this.stations = [];
-	this.spinnerInterval = null;
-	this.stations[0] = new Station("24Seven.FM", "247", "247.png", "", "");
-	this.stations[1] = new Station("Streaming Soundtracks.com", "SST", "sst.jpg", "http://www.streamingsoundtracks.com/", "http://loudcity.com/stations/streamingsoundtracks-com/files/show/");
-	this.stations[2] = new Station("Death.FM", "DFM", "dfm.png", "http://death.fm/", "http://loudcity.com/stations/death-fm/files/show/");
-	this.stations[3] = new Station("Entranced.FM", "EFM", "efm.jpg", "http://entranced.fm/", "http://loudcity.com/stations/entranced-fm/files/show/");
-	this.stations[4] = new Station("1980s.FM", "80s", "80s.jpg", "http://1980s.fm/", "http://loudcity.com/stations/1980s-fm/files/show/");
-	this.stations[5] = new Station("Adagio.FM", "AFM", "afm.jpg", "http://adagio.fm/", "http://loudcity.com/stations/adagio-fm/files/show/");
-	
-	System.Gadget.onUndock = this.undock;
-	System.Gadget.onDock = this.dock;
-	System.Gadget.Flyout.file = "flyout.html";
-	System.Gadget.settingsUI = "settings.html";
-	System.Gadget.onSettingsClosed = readSettings;
-}
-
-/**
- * Convert the station name to the station id
- * 
- * @param	string	naam
- * @return	int
- */
-IR247fm.prototype.station2stationid = function (naam)
-{
-	for (var x = 1; x < this.stations.length; x++)
-	{
-		if (naam.toLowerCase() === this.stations[x].getShortname().toLowerCase())
-		{
-			return x;
-		}
-	}
-	return 0;
-};
-
-/**
- * Set the background of the Gadget
- * 
- * @return	void
- */
-IR247fm.prototype.setBackground = function ()
-{
-	this.stations[this.curstation].setBackground();
-};
-
-/**
- * Destruct the 24 seven FM Object
- * 
- * @return	void
- */
-IR247fm.prototype.destruct = function ()
-{
-	if (this.spinnerInterval !== null)
-	{
-		clearInterval(this.spinnerInterval);
-		this.spinnerInterval = null;
-	}
-	EventManager.CleanUp();
-};
-
-/**
- * Initialize the 24 seven FM Object
- * 
- * @return	void
- */
-IR247fm.prototype.init = function ()
-{
-	document.getElementById("introText").innerHTML = this.language.introtext;
-	document.getElementById("errorIcon").alt = this.language.infoIcon;
-	if (this.spinnerInterval === null)
-	{
-		this.spinnerInterval = setInterval(function ()
-		{
-			var curHeight = parseInt(document.getElementById("busyIcon").style.backgroundPositionY, 10);
-			if (isNaN(curHeight) || curHeight === "" || curHeight < 0)
-			{
-				curHeight = 288;
+	function init() {
+		/**
+		 * The station that is active
+		 * 
+		 * @var integer
+		 */
+		var curstation = 0;
+		
+		/**
+		 * The default station (from the settings)
+		 * 
+		 * @var integer
+		 */
+		var defstation = 0;
+		
+		/**
+		 * Is the countdown active (settings)
+		 * 
+		 * @var boolean
+		 */
+		var countdownActive = true;
+		
+		/**
+		 * Is the miniRadio active (settings)
+		 */
+		var miniRadioActive = true;
+		
+		/**
+		 * The current language
+		 * 
+		 * @var Language
+		 */
+		var language = new Language();
+		
+		/**
+		 * Interval ID
+		 * 
+		 * @var integer
+		 */
+		var spinnerInterval = null;
+		
+		/**
+		 * Read the settings
+		 */
+		function readNewSettings() {
+			var defStation = parseInt(System.Gadget.Settings.readString('SettingsDefStation'), 10);
+			if (! isNaN(defStation) && defStation !== 0) {
+				defstation = defStation;
 			}
-			curHeight -= 16;
-			document.getElementById("busyIcon").style.backgroundPositionY = curHeight;
-		}, 30);
+			
+			var countDownSetting = System.Gadget.Settings.readString('SettingsCountdown');
+			if (countDownSetting !== '') {
+				countdownActive = false;
+				Countdown.getInstance().setActive(false);
+			} else {
+				countdownActive = true;
+				if (curstation !== 0 && ! StationManager.getInstance().getActive().commercial) {
+					Countdown.getInstance().setActive(true);
+				}
+			}
+			var miniRadioSetting = System.Gadget.Settings.readString('SettingsMiniRadio');
+			if (miniRadioSetting !== '') {
+				miniRadioActive = false;
+				MiniPlayer.getInstance().setActive(false);
+			} else {
+				miniRadioActive = true;
+				if (curstation !== 0) {
+					MiniPlayer.getInstance().setActive(true);
+				}
+			}
+			var audioFormat = System.Gadget.Settings.readString('SettingsAudioFormat');
+			StationManager.getInstance().setAudioformat(audioFormat);
+		}
+		
+		/**
+		 * Set the new station
+		 * 
+		 * @param integer station_id
+		 * @param boolean init
+		 */
+		function setNewStation(station, init) {
+			if (station !== curstation || init) {
+				document.getElementById('countdownTimer').innerHTML = '';
+				System.Gadget.beginTransition();
+				curstation = station;
+				var stationManager = StationManager.getInstance();
+				var newStation = stationManager.getByID(curstation);
+				
+				stationManager.setActive(newStation.code);
+				
+				if (curstation !== 0) {
+					stationManager.getData();
+					if (miniRadioActive) {
+						MiniPlayer.getInstance().setURL(stationManager.getAudioURL());
+					}
+					if (countdownActive && ! newStation.commercial) {
+						Countdown.getInstance().setActive(true);
+					}
+				}
+				UpdateCheck.getInstance().setFlyoutBackground(newStation.backgroundImg);
+				UpdateCheck.getInstance().setFlyoutClassName(newStation.classVal);
+				System.Gadget.endTransition(System.Gadget.TransitionType.morph, 1);
+			}
+		}
+		
+		/**
+		 * Initialize the gadget
+		 */
+		function initGadget() {
+			System.Gadget.onUndock = function() {
+				RadioGadget.getInstance().undock();
+			};
+			System.Gadget.onDock = function() {
+				RadioGadget.getInstance().dock();
+			};
+			System.Gadget.Flyout.file = 'flyout.html';
+			System.Gadget.settingsUI = 'settings.html';
+			System.Gadget.onSettingsClosed = function() {
+				RadioGadget.getInstance().readSettings();
+			};
+//			System.Gadget.visibilityChanged = RadioGadget.getInstance().changeVisibility();
+			
+			document.getElementById('introText').innerHTML = language.introtext;
+			document.getElementById('errorIcon').alt = language.infoIcon;
+			
+			if (spinnerInterval === null) {
+				spinnerInterval = setInterval(function() {
+						var curHeight = parseInt(document.getElementById('busyIcon').style.backgroundPositionY, 10);
+						if (isNaN(curHeight) || curHeight === '' || curHeight < 0) {
+							curHeight = 288;
+						}
+						curHeight -= 16;
+						document.getElementById('busyIcon').style.backgroundPositionY = curHeight;
+					},
+					30
+				);
+			}
+			
+			document.getElementById('minitabs').style.display = 'none';
+			document.getElementById('updateenabled').style.display = 'none';
+			
+			UpdateCheck.getInstance().setLanguage(language);
+			MiniPlayer.getInstance().setLanguage(language);
+			var stationManager = StationManager.getInstance();
+			stationManager.setLanguage(language);
+			
+			stationManager.add('24Seven.FM', '247', '247.png', '', '');
+			stationManager.add('Streaming Soundtracks.com', 'SST', 'sst.jpg', 'http://www.streamingsoundtracks.com/', 'http://loudcity.com/stations/streamingsoundtracks-com/files/show/');
+			stationManager.add('Death.FM', 'DFM', 'dfm.png', 'http://death.fm/', 'http://loudcity.com/stations/death-fm/files/show/');
+			stationManager.add('Entranced.FM', 'EFM', 'efm.jpg', 'http://entranced.fm/', 'http://loudcity.com/stations/entranced-fm/files/show/');
+			stationManager.add('1980s.FM', '80s', '80s.jpg', 'http://1980s.fm/', 'http://loudcity.com/stations/1980s-fm/files/show/');
+			stationManager.add('Adagio.FM', 'AFM', 'afm.jpg', 'http://adagio.fm/', 'http://loudcity.com/stations/adagio-fm/files/show/');
+			stationManager.initTabs();
+			
+			readNewSettings();
+			
+			EventManager.Add('tabopenlink', 'mouseover', function() {
+				RadioGadget.getInstance().showMenu();
+			});
+			EventManager.Add('minitabs', 'mouseover', function() {
+				RadioGadget.getInstance().showMenu();
+			});
+			EventManager.Add('minitabs', 'mouseout', function() {
+				RadioGadget.getInstance().hideMenu();
+			});
+			
+			setNewStation(defstation, true);
+			if (System.Gadget.docked) {
+				RadioGadget.getInstance().dock();
+			} else {
+				RadioGadget.getInstance().undock();
+			}
+		}
+		
+		return {
+			/**
+			 * Function called on dock event
+			 */
+			dock: function() {
+				document.getElementById('minibar').style.display = 'block';
+				document.getElementById('bar1').className = 'docked';
+				document.getElementById('bar2').className = 'docked';
+				document.getElementById('content').className = 'docked';
+				document.getElementsByTagName('body')[0].style.width = '130px';
+				document.getElementById('mainbackground').style.width = '100%';
+				StationManager.getInstance().setBackground();
+			},
+			/**
+			 * Function called on undock event
+			 */
+			undock: function() {
+				document.getElementById('minibar').style.display = 'none';
+				document.getElementById('bar1').className = 'undocked';
+				document.getElementById('bar2').className = 'undocked';
+				document.getElementById('content').className = 'undocked';
+				document.getElementsByTagName('body')[0].style.width = '300px';
+				document.getElementById('mainbackground').style.width = '100%';
+				StationManager.getInstance().setBackground();
+			},
+			/**
+			 * Function to read the (new) settings
+			 */
+			readSettings: function() {
+				readNewSettings();
+			},
+			/**
+			 * Function to show the menu
+			 */
+			showMenu: function() {
+				document.getElementById('minitabs').style.display = 'block';
+				window.event.returnValue = false;
+			},
+			/**
+			 * Function to hide the menu
+			 */
+			hideMenu: function() {
+				document.getElementById('minitabs').style.display = 'none';
+				window.event.returnValue = false;
+			},
+			/**
+			 * Set the station as active
+			 * 
+			 * @param integer station_id
+			 * @param boolean init
+			 */
+			setStation: function(station_id) {
+				setNewStation(station_id, false);
+			},
+			/**
+			 * Bootstrap method
+			 */
+			bootstrap: function() {
+				initGadget();
+			}
+		};
 	}
-	var mainObj = this;
-	document.getElementById("minitabs").style.display = 'none';
-	document.getElementById("updateenabled").style.display = 'none';
 	
-	MiniPlayer.getInstance().setLanguage(this.language);
-	this.initTabs();
-	this.readSettings();
-	
-	EventManager.Add("tabopenlink", "mouseover", this.showMenu);
-	EventManager.Add("minitabs", "mouseover", this.showMenu);
-	EventManager.Add("minitabs", "mouseout", this.hideMenu);
-	for (var x = 1; x < this.stations.length; x++)
-	{
-		this.stations[x].setLanguage(this.language);
-		EventManager.Add("mtab_" + this.stations[x].getShortname().toLowerCase(), "click", function () {
-			var e = window.event;
-			e.cancelBubble = true;
-			mainObj.setStation(mainObj.station2stationid(e.srcElement.id.substring(5)), false);
-			e.returnValue = false;
-		});
-		EventManager.Add("btab_" + this.stations[x].getShortname().toLowerCase(), "click", function () {
-			var e = window.event;
-			e.cancelBubble = true;
-			mainObj.setStation(mainObj.station2stationid(e.srcElement.id.substring(5)), false);
-			e.returnValue = false;
-		});
-	}
-	
-	UpdateCheck.getInstance().setLanguage(this.language);
-	this.setStation(this.defstation, true);
-	if (System.Gadget.docked) {
-		this.dock();
-	} else {
-		this.undock();
-	}
-};
-
-/**
- * Create the links to the stations in the tabs/menu
- * 
- * @return	void
- */
-IR247fm.prototype.initTabs = function ()
-{
-	var total = this.stations.length - 1;
-	var bightml = "";
-	var minihtml = "";
-	var percentage = parseInt(95 / total, 10);
-	for (var x = 1; x < this.stations.length; x++)
-	{
-		minihtml += minihtml === "" ? "" : "<br />";
-		minihtml += "<a href=\"#\" id=\"mtab_" + this.stations[x].getShortname().toLowerCase() + "\" class=\"tab_" + this.stations[x].getShortname().toLowerCase() + "\" title=\"" + this.stations[x].getStationName() + "\">" + this.stations[x].getShortname() + "</a>";
-		bightml += "<div style=\"float: left; text-align: center; width: " + percentage + "%;\"><a href=\"#\" id=\"btab_" + this.stations[x].getShortname().toLowerCase() + "\" class=\"tab_" + this.stations[x].getShortname().toLowerCase() + "\" title=\"" + this.stations[x].getStationName() + "\">" + this.stations[x].getShortname() + "</a></div>";
-	}
-	document.getElementById("minitabs").innerHTML = minihtml;
-	document.getElementById("bigtabs").innerHTML = bightml;
-};
-
-/**
- * Read the saved preferences
- * 
- * @return	void
- */
-IR247fm.prototype.readSettings = function ()
-{
-	var defStation = parseInt(System.Gadget.Settings.readString("SettingsDefStation"), 10);
-	if (!isNaN(defStation) && defStation !== 0) {
-		this.defstation = defStation;
-	}
-	var countDownSetting = System.Gadget.Settings.readString("SettingsCountdown");
-	if (countDownSetting !== "") {
-		this.countdownActive = false;
-		Countdown.getInstance().setActive(false);
-	} else {
-		this.countdownActive = true;
-		if (this.curstation !== 0 && ! this.stations[this.curstation].isCommercial()) {
-			Countdown.getInstance().setActive(true);
+	return {
+		/**
+		 * Get the instance of the Radio Gadget
+		 * 
+		 * @return RadioGadget
+		 */
+		getInstance: function() {
+			if (instance === null) {
+				instance = init();
+			}
+			return instance;
 		}
-	}
-	var miniRadioSetting = System.Gadget.Settings.readString("SettingsMiniRadio");
-	if (miniRadioSetting !== "") {
-		this.miniRadioActive = false;
-		MiniPlayer.getInstance().setActive(false);
-	} else {
-		this.miniRadioActive = true;
-		if (this.curstation !== 0) {
-			MiniPlayer.getInstance().setActive(true);
-		}
-	}
-	var audioFormat = System.Gadget.Settings.readString("SettingsAudioFormat");
-	for (var x = 0; x < this.stations.length; x++)
-	{
-		this.stations[x].setAudioformat(audioFormat);
-	}
-};
+	};
+})();
 
-/**
- * Enable the station
- * 
- * Called from user interaction
- * 
- * @param	int		station
- * @param	boolean	init
- * @return	void
- */
-IR247fm.prototype.setStation = function (station, init)
-{
-	if (station !== this.curstation || init)
-	{
-		document.getElementById("countdownTimer").innerHTML = "";
-		System.Gadget.beginTransition();
-		if (! init)
-		{
-			this.stations[this.curstation].disableStation();
-		}
-		this.curstation = station;
-		this.stations[this.curstation].enableStation();
-		if (this.curstation !== 0)
-		{
-			this.stations[this.curstation].getSOAPdata();
-		}
-		if (this.miniRadioActive && this.curstation !== 0)
-		{
-			MiniPlayer.getInstance().setURL(this.stations[this.curstation].getAudioURL());
-		}
-		if (this.countdownActive && this.curstation !== 0)
-		{
-			Countdown.getInstance().setActive(true);
-		}
-		UpdateCheck.getInstance().setFlyoutBackground(this.stations[this.curstation].getFlyoutBackground());
-		UpdateCheck.getInstance().setFlyoutClassName(this.stations[this.curstation].getFlyoutClassName());
-		System.Gadget.endTransition(System.Gadget.TransitionType.morph, 1);
-	}
-};
-
-/**
- * Show the menu with stations in the docked view
- * 
- * @return	void
- */
-IR247fm.prototype.showMenu = function ()
-{
-	document.getElementById("minitabs").style.display = 'block';
-	window.event.returnValue = false;
-};
-
-/**
- * Hide the menu with stations in the docked view
- * 
- * @return	void
- */
-IR247fm.prototype.hideMenu = function ()
-{
-	document.getElementById("minitabs").style.display = 'none';
-	window.event.returnValue = false;
-};
-
-/**
- * Change the view from undocked to docked
- * 
- * Called when the gadget is docked
- * 
- * @return	void
- */
-IR247fm.prototype.dock = function ()
-{
-	document.getElementById("minibar").style.display = 'block';
-	document.getElementById("bar1").className = "docked";
-	document.getElementById("bar2").className = "docked";
-	document.getElementById("content").className = "docked";
-	document.getElementsByTagName("body")[0].style.width = '130px';
-	document.getElementById("mainbackground").style.width = "100%";
-	setGadgetBackground();
-};
-
-/**
- * Change the view from docked to undocked
- * 
- * Called when the gadget is undocked
- * 
- * @return	void
- */
-IR247fm.prototype.undock = function ()
-{
-	document.getElementById("minibar").style.display = 'none';
-	document.getElementById("bar1").className = "undocked";
-	document.getElementById("bar2").className = "undocked";
-	document.getElementById("content").className = "undocked";
-	document.getElementsByTagName("body")[0].style.width = '300px';
-	document.getElementById("mainbackground").style.width = "100%";
-	setGadgetBackground();
-};
-
-IR247fm.prototype.station_getSoapData = function (id)
-{
-	this.stations[id].getSOAPdata();
-};
-
-/**
- * Other functions for interaction with setTimeout and body->onload
- */
-var ir;
-
-function init()
-{
-	ir = new IR247fm();
-	ir.init();
-}
-
-function setGadgetBackground()
-{
-	ir.setBackground();
-}
-
-function readSettings()
-{
-	ir.readSettings();
-}
-
-function station_getSoapData(id)
-{
-	var num = ir.station2stationid(id);
-	ir.station_getSoapData(num);
+function init() {
+	RadioGadget.getInstance().bootstrap();
 }

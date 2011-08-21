@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * Copyright (C) 2008 - 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
  * 
  * This gadget is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,563 +17,581 @@
  * $Id: stationObject.js 14 2008-12-24 14:27:01Z stefan.grootscholten $
  */
 
-
-/**
- * Constructor of the station Object
- */
-function Station(name, shortname, logo, url, listenurl)
-{
-	this.classVal = "station" + shortname;
-	this.name = name;
-	this.shortname = shortname;
-	this.logo = "/img/logo/" + logo;
-	this.backgroundImg = "img/bg/small/" + shortname.toLowerCase() + ".png";
-	this.backgroundImgLarge = "img/bg/large/" + shortname.toLowerCase() + ".png";
-	this.audiourlWMP = listenurl + "WMP-lo.asx";
-//	this.audiourlWMPHi = listenurl + "WMP-hi.asx";
-	this.audiourlWMPHd = listenurl + "WMP-hd.asx";
-	this.audiourlLo = listenurl + "aacPlus-lo.asx";
-	this.audiourlHi = listenurl + "aacplus-hi.asx";
-	this.url = url;
-	this.nextUpdate = 0;
-	this.listenercount = 0;
-	this.active = false;
-	this.language = null;
-	this.trackTimer = null;
-	this.timeoutTimer = null;
-	this.album = "";
-	this.artist = "";
-	this.title = "";
-	this.errorText = "";
-	this.busyText = "";
-	this.cover = this.logo;
-	this.xmlHttp = null;
-	
-	this.audioformat = "";
-	
-	this.flyout = false;
-}
-
-/**
- * Set the audio format of the stream
- * 
- * @param	String	audioformat
- * @return	void
- */
-Station.prototype.setAudioformat = function (audioformat)
-{
-	this.audioformat = audioformat;
-};
-
-/**
- * Set the language Object
- * 
- * @param	Language	language
- * @return	void
- */
-Station.prototype.setLanguage = function (language)
-{
-	this.language = language;
-};
-
-/**
- * Set the background of the Gadget
- * 
- * @return	void
- */
-Station.prototype.setBackground = function ()
-{
-	var obg = document.getElementById("mainbackground");
-	obg.className = this.classVal;
-	if (System.Gadget.docked)
-	{
-		obg.src = "url(" + this.backgroundImg + ")";
-	}
-	else
-	{
-		obg.src = "url(" + this.backgroundImgLarge + ")";
-	}
-};
-
-/**
- * Get the class of the Flyout
- * 
- * @return	String
- */
-Station.prototype.getFlyoutClassName = function ()
-{
-	return this.classVal;
-};
-
-/**
- * Get the background of the Flyout
- * 
- * @return	String
- */
-Station.prototype.getFlyoutBackground = function ()
-{
-	return this.backgroundImg;
-};
-
-/**
- * Enable the current radiostation
- * 
- * Changes the view to the current station
- * @return	void
- */
-Station.prototype.enableStation = function ()
-{
-	var now = new Date();
-	if (this.countdown !== null)
-	{
-		Countdown.getInstance().setEndtime(this.nextUpdate);
-	}
-	if (now.getTime() > this.nextUpdate)
-	{
-		document.getElementById("cover").innerHTML = "<img src=\"" + this.logo + "\" alt=\"" + this.name + "\" />";
-	}
-	System.Gadget.Flyout.show = false;
-	this.flyout = false;
-	this.active = true;
-	this.setBackground();
-	var minititle = document.getElementById("minititle");
-	if (this.url === "")
-	{
-		minititle.innerText = this.shortname;
-	}
-	else
-	{
-		minititle.innerHTML = "<a href=\"#\" id=\"miniLinks\">" + this.shortname + "</a>";
-	}
-	var bigtitle = document.getElementById("bigtitle");
-	if (this.url === "")
-	{
-		bigtitle.innerHTML = this.name;
-	}
-	else
-	{
-		bigtitle.innerHTML = "<a href=\"#\" id=\"bigLinks\">" + this.name + "</a>";
-	}
-	var logo = document.getElementById("cover");
-	logo.innerHTML = "<img src=\"" + this.logo + "\" alt=\"" + this.name + "\" />";
-	this.formatView();
-	if (this.url !== "")
-	{
-		var stObj = this;
-		EventManager.Add("miniLinks", "click", function () {
-			var e = window.event;
-			e.cancelBubble = true;
-			stObj.openFlyout();
-			e.returnValue = false;
-		});
-		EventManager.Add("bigLinks", "click", function () {
-			var e = window.event;
-			e.cancelBubble = true;
-			stObj.openFlyout();
-			e.returnValue = false;
-		});
-	}
-};
-
-/**
- * Open the station flyout
- * 
- * @return	void
- */
-Station.prototype.openFlyout = function ()
-{
-	if (System.Gadget.Flyout.show)
-	{
-		if (this.flyout)
-		{
-			return;
-		}
-		System.Gadget.Flyout.show = false;
-	}
-	var stObj = this;
-	System.Gadget.Flyout.onShow = function ()
-	{
-		stObj.formatFlyout();
+var Station = (function() {
+	var Station = function(name, code, logo, url, listenurl, id) {
+		this.id = id;
+		this.name = name;
+		this.code = code;
+		this.classVal = 'station' + code;
+		this.backgroundImg = 'img/bg/small/' + code.toLowerCase() + '.png';
+		this.backgroundImgLarge = 'img/bg/large/' + code.toLowerCase() + '.png';
+		this.logo = '/img/logo/' + logo;
+		this.url = url;
+		this.audiourlWMPHd = listenurl + 'WMP-hd.asx';
+		this.audiourlAACPlusLo = listenurl + 'aacPlus-lo.asx';
+		this.nextUpdate = 0;
+		this.listenercount = 0;
+		this.active = false;
+		this.commercial = false;
+		this.flyout = false;
+		this.album = '';
+		this.artist = '';
+		this.title = '';
+		this.cover = this.logo;
+		this.link = '';
+		this.errorText = '';
+		this.busyText = '';
 	};
-	System.Gadget.Flyout.onHide = function ()
-	{
-		stObj.flyout = false;
+	
+	return function(name, code, logo, url, listenurl, id) {
+		return new Station(name, code, logo, url, listenurl, id);
 	};
-	System.Gadget.Flyout.show = true;
-};
+})();
 
-/**
- * Format the station flyout
- * 
- * @return	void
- */
-Station.prototype.formatFlyout = function ()
-{
-	this.flyout = true;
-	var siteLinks = "<a href=\"" + this.url + "\" title=\"" + this.language.visitHomepage + "\">" + this.language.homepage + "</a><br /><a href=\"" + this.url + "modules.php?name=Queue_Played\" title=\"" + this.language.viewQueue + "\">" + this.language.queue + "</a><br /><a href=\"" + this.url + "modules.php?name=Requests\" title=\"" + this.language.makeRequest + "\">" + this.language.request + "</a><br /><a href=\"" + this.url + "modules.php?name=Forums\" title=\"" + this.language.visitForums + "\">" + this.language.forums + "</a><br /><a href=\"" + this.url + "modules.php?name=Donations\" title=\"" + this.language.donations + "\">" + this.language.donate + "</a><br />" + this.listenercount + " <a href=\"" + this.url + "modules.php?name=Listen\" title=\"" + this.language.moreListen + "\">" + this.language.listeners + "</a>";
-	var doc = System.Gadget.Flyout.document;
-	doc.getElementById("updatecontent").style.display = 'none';
-	doc.getElementById("linkscontent").style.display = 'block';
-	doc.getElementById("flyoutBackground").className = this.classVal;
-	doc.getElementById("flyoutBackground").src = "url(" + this.backgroundImg + ")";
-	doc.getElementById("stationtitle").innerHTML = this.name;
-	doc.getElementById("siteLinks").innerHTML = siteLinks;
-};
-
-/**
- * Disable the current radiostation
- * 
- * @return	void
- */
-Station.prototype.disableStation = function ()
-{
-	EventManager.Remove("miniLinks", "click");
-	EventManager.Remove("bigLinks", "click");
-	this.active = false;
-};
-
-/**
- * Get the short name of the station
- * 
- * @return	string
- */
-Station.prototype.getShortname = function ()
-{
-	return this.shortname;
-};
-
-/**
- * Get the full name of the station
- * 
- * @return	string
- */
-Station.prototype.getStationName = function ()
-{
-	return this.name;
-};
-
-/**
- * Get the audio URL for the station
- * 
- * @return	string
- */
-Station.prototype.getAudioURL = function ()
-{
-	if (this.audioformat === "Lo")
-	{
-//		return this.audiourlLo;
-		return this.audiourlWMP;
-	}
-	else if (this.audioformat === "Hi")
-	{
-//		return this.audiourlHi;
-		return this.audiourlWMPHd;
-	}
-	else if (this.audioformat === "WMPHi")
-	{
-//		return this.audiourlWMPHi;
-		return this.audiourlWMPHd;
-	}
-	else if (this.audioformat === "WMPHd")
-	{
-		return this.audiourlWMPHd;
-	}
-	return this.audiourlWMP;
-};
-
-/**
- * Check if the current track is a station ID
- * 
- * @return	boolean
- */
-Station.prototype.isCommercial = function ()
-{
-	return this.commercial;
-};
-
-/**
- * Get the next update time
- * 
- * @return	integer
- */
-Station.prototype.getNextUpdate = function ()
-{
-	return this.nextUpdate;
-};
-
-/**
- * Initialize the SOAP request
- * 
- * @return	void
- */
-Station.prototype.getSOAPdata = function ()
-{
-	var now = new Date();
-	if (now.getTime() < this.nextUpdate) {
-		var diff = (this.nextUpdate - now.getTime());
-		if (diff < 5000) {
-			this.trackTimer = setTimeout(function () {
-				station_getSoapData(this.shortname);
-				return true;
-			}, diff + 1000);
-		}
-		return;
-	}
-	if (this.timeoutTimer !== null)
-	{
-		clearTimeout(this.timeoutTimer);
-		this.timeoutTimer = null;
-	}
-	if (!this.active)
-	{
-		return;
-	}
-	this.album = "";
-	this.artist = "";
-	this.title = "";
-	this.errorText = "";
-	this.busyText = this.language.busyLoading;
-	this.formatView();
-	if (this.xmlHttp === null)
-	{
-		this.xmlHttp = new XMLHttpRequest();
-	}
-	var stObj = this;
-	var soapReq = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-		"<soap:Envelope " +
-		"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-		"xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-		"xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
-		"<soap:Body>" +
-		"<GetCurrentlyPlaying xmlns=\"http://24seven.fm\">" +
-		"<GetCover>false</GetCover>" +
-		"</GetCurrentlyPlaying></soap:Body></soap:Envelope>";
-	this.timeoutTimer = setTimeout(function () {
-		stObj.xmlHttp.abort();
-		var now = new Date();
-		stObj.album = "";
-		stObj.artist = "";
-		stObj.title = "";
-		stObj.errorText = stObj.language.serviceTimedOut;
-		stObj.busyText = "";
-		stObj.cover = "";
-		stObj.commercial = true;
-		stObj.formatView();
-		stObj.trackTimer = setTimeout(function () {
-			station_getSoapData(stObj.shortname);
-			return true;
-		}, 61500);
-	}, 30000);
-	try
-	{
-		this.xmlHttp.open("POST", this.url + "soap/FM24seven.php", true);
-		this.xmlHttp.onreadystatechange = function ()
-		{
-			if (this.readyState !== 4)
-			{
-				return;
-			}
-			if (stObj.timeoutTimer !== null) {
-				clearTimeout(stObj.timeoutTimer);
-				stObj.timeoutTimer = null;
-			}
-			if (this.status !== 200)
-			{
-				stObj.artist = "";
-				stObj.album = "";
-				stObj.title = "";
-				stObj.errorText = stObj.language.serviceNotAvailable;
-				stObj.busyText = "";
-				stObj.cover = "";
-				stObj.nextUpdate = now.getTime() + 60000;
-				stObj.commercial = true;
-				stObj.trackTimer = setTimeout(function () {
-					station_getSoapData(stObj.shortname);
-					return true;
-				}, 61500);
-				stObj.formatView();
-				return;
-			}
-			stObj.commercial = false;
-			var xml = this.responseXML;
-			var tracklength = 0;
-			var systemTime = new Date();
-			var playStart = new Date();
-			if (xml.getElementsByTagName("Length").length !== 0 && xml.getElementsByTagName("Length")[0].childNodes.length !== 0)
-			{
-				tracklength = parseInt(xml.getElementsByTagName("Length")[0].childNodes[0].nodeValue / 1000, 10);
-			}
-			if (xml.getElementsByTagName("PlayStart").length !== 0 && xml.getElementsByTagName("PlayStart")[0].childNodes.length !== 0)
-			{
-				var playstartStr = xml.getElementsByTagName("PlayStart")[0].childNodes[0].nodeValue;
-				playStart.setYear(parseInt(playstartStr.substring(0, 4), 10));
-				playStart.setMonth(parseInt(playstartStr.substring(5, 7), 10) - 1);
-				playStart.setDate(parseInt(playstartStr.substring(8, 10), 10));
-				playStart.setHours(parseInt(playstartStr.substring(11, 13), 10));
-				playStart.setMinutes(parseInt(playstartStr.substring(14, 16), 10));
-				playStart.setSeconds(parseInt(playstartStr.substring(17, 19), 10));
-			}
-			if (xml.getElementsByTagName("SystemTime").length !== 0 && xml.getElementsByTagName("SystemTime")[0].childNodes.length !== 0)
-			{
-				var systimeStr = xml.getElementsByTagName("SystemTime")[0].childNodes[0].nodeValue;
-				systemTime.setYear(parseInt(systimeStr.substring(0, 4), 10));
-				systemTime.setMonth(parseInt(systimeStr.substring(5, 7), 10) - 1);
-				systemTime.setDate(parseInt(systimeStr.substring(8, 10), 10));
-				systemTime.setHours(parseInt(systimeStr.substring(11, 13), 10));
-				systemTime.setMinutes(parseInt(systimeStr.substring(14, 16), 10));
-				systemTime.setSeconds(parseInt(systimeStr.substring(17, 19), 10));
-			}
-			var refresh = tracklength - parseInt((systemTime.getTime() - playStart.getTime()) / 1000, 10);
-			if (refresh < 0)
-			{
-				stObj.album = "StationID";
-				stObj.commercial = true;
-				refresh = 60;
-			}
-			else
-			{
-				if (xml.getElementsByTagName("Album").length !== 0 && xml.getElementsByTagName("Album")[0].childNodes.length !== 0) {
-					stObj.album = xml.getElementsByTagName("Album")[0].childNodes[0].nodeValue;
+var StationManager = (function() {
+	/**
+	 * Instance of the station manager
+	 * 
+	 * @var StationManager
+	 */
+	var instance;
+	
+	function init() {
+		/**
+		 * Defined stations
+		 * 
+		 * @var array
+		 */
+		var stations = [];
+		
+		/**
+		 * The default audioformat
+		 * 
+		 * @var string
+		 */
+		var audioFormat;
+		
+		/**
+		 * Instance of the language object
+		 * 
+		 * @var Language
+		 */
+		var language;
+		
+		return {
+			/**
+			 * Add a station to the manager
+			 * 
+			 * @param string name
+			 * @param string code
+			 * @param string logo
+			 * @param string url
+			 * @param string listenurl
+			 */
+			add: function(name, code, logo, url, listenurl) {
+				var id = stations.length;
+				stations[id] = new Station(name, code, logo, url, listenurl, id);
+			},
+			/**
+			 * Initialize the tabs
+			 */
+			initTabs: function() {
+				var total = stations.length - 1;
+				// Initialize the HTML for the tabs
+				var perc = parseInt(95 / total, 10);
+				var bightml = minihtml = '';
+				for (var x = 1; x < stations.length; x++) {
+					bightml += '<div style="float: left; text-align: center; width: ' + perc + '%;"><a href="#" id="btab_' + stations[x].code.toLowerCase() + '" class="tab_' + stations[x].code.toLowerCase() + '" title="' + stations[x].name + '">' + stations[x].code + '</a></div>';
+					minihtml += (minihtml !== '' ? '<br />' : '') + '<a href="#" id="mtab_' + stations[x].code.toLowerCase() + '" class="tab_' + stations[x].code.toLowerCase() + '" title="' + stations[x].name + '">' + stations[x].code + '</a>';
 				}
-				if (xml.getElementsByTagName("Track").length !== 0 && xml.getElementsByTagName("Track")[0].childNodes.length !== 0) {
-					stObj.title = xml.getElementsByTagName("Track")[0].childNodes[0].nodeValue;
+				document.getElementById('bigtabs').innerHTML = bightml;
+				document.getElementById('minitabs').innerHTML = minihtml;
+				// Initialize the Events on the tabs.
+				for (var x = 1; x < stations.length; x++) {
+					EventManager.Add('mtab_' + stations[x].code.toLowerCase(), 'click', function () {
+						var e = window.event;
+						e.cancelBubble = true;
+						var code = e.srcElement.id.substring(5);
+						var station = StationManager.getInstance().getByCode(code);
+						RadioGadget.getInstance().setStation(station.id);
+						e.returnValue = false;
+					});
+					EventManager.Add('btab_' + stations[x].code.toLowerCase(), 'click', function () {
+						var e = window.event;
+						e.cancelBubble = true;
+						var code = e.srcElement.id.substring(5);
+						var station = StationManager.getInstance().getByCode(code);
+						RadioGadget.getInstance().setStation(station.id);
+						e.returnValue = false;
+					});
 				}
-				if (xml.getElementsByTagName("Artist").length !== 0 && xml.getElementsByTagName("Artist")[0].childNodes.length !== 0) {
-					stObj.artist = xml.getElementsByTagName("Artist")[0].childNodes[0].nodeValue;
+			},
+			/**
+			 * Get the active station
+			 * 
+			 * @return Station
+			 */
+			getActive: function() {
+				for (var x = 0; x < stations.length; x++) {
+					if (stations[x].active) {
+						return stations[x];
+					}
 				}
-				if (xml.getElementsByTagName("CoverLink").length !== 0 && xml.getElementsByTagName("CoverLink")[0].childNodes.length !== 0) {
-					var coverurl = xml.getElementsByTagName("CoverLink")[0].childNodes[0].nodeValue;
-					stObj.cover = coverurl.replace(/cover\//, 'cover/040/');
+				return null;
+			},
+			/**
+			 * Get the station by code
+			 * 
+			 * @param string code
+			 * 
+			 * @return Station
+			 */
+			getByCode: function(code) {
+				for (var x = 0; x < stations.length; x++) {
+					if (stations[x].code.toLowerCase() === code.toLowerCase()) {
+						return stations[x];
+					}
 				}
-				if (xml.getElementsByTagName("ListenerCount").length !== 0 && xml.getElementsByTagName("ListenerCount")[0].childNodes.length !== 0) {
-					stObj.listenercount = parseInt(xml.getElementsByTagName("ListenerCount")[0].childNodes[0].nodeValue, 10);
+				return null;
+			},
+			/**
+			 * Get the station by ID
+			 * 
+			 * @param integer id
+			 * 
+			 * @return Station
+			 */
+			getByID: function(id) {
+				for (var x = 0; x < stations.length; x++) {
+					if (stations[x].id === id) {
+						return stations[x];
+					}
 				}
-				stObj.errorText = "";
-				stObj.busyText = "";
+				return null;
+			},
+			/**
+			 * Set the active state of a station
+			 * 
+			 * @param string code
+			 */
+			setActive: function(code) {
+				var actSt = this.getActive();
+				
+				if (actSt !== null && actSt.code === code) {
+					return;
+				} else if (actSt !== null) {
+					EventManager.Remove('miniLinks', 'click');
+					EventManager.Remove('bigLinks', 'click');
+					actSt.active = false;
+				}
+				
+				var actSt = this.getByCode(code);
+				
+				actSt.active = true;
+				
+				Countdown.getInstance().setEndtime(actSt.nextUpdate);
+				document.getElementById('cover').innerHTML = '<img src="' + actSt.logo + '" alt="' + actSt.name + '" width="40" height="40" />';
+				
+				System.Gadget.Flyout.show = false;
+				actSt.flyout = false;
+				
+				this.setBackground();
+				
+				var minititle = document.getElementById('minititle');
+				var bigtitle = document.getElementById('bigtitle');
+				if (actSt.url === '') {
+					minititle.innerHTML = actSt.code;
+					bigtitle.innerHTML = actSt.name;
+				} else {
+					minititle.innerHTML = '<a href="#" id="miniLinks">' + actSt.code + '</a>';
+					bigtitle.innerHTML = '<a href="#" id="bigLinks">' + actSt.name + '</a>';
+					EventManager.Add('miniLinks', 'click', function () {
+						var e = window.event;
+						e.cancelBubble = true;
+						StationManager.getInstance().openFlyout();
+						e.returnValue = false;
+					});
+					EventManager.Add('bigLinks', 'click', function () {
+						var e = window.event;
+						e.cancelBubble = true;
+						StationManager.getInstance().openFlyout();
+						e.returnValue = false;
+					});
+				}
+				
+				this.formatView();
+			},
+			/**
+			 * Check if a station is the active station
+			 * 
+			 * @param string code
+			 * 
+			 * @return boolean
+			 */
+			isActive: function(code) {
+				var actSt = this.getActive();
+				return actSt.code === code;
+			},
+			/**
+			 * Set the language object
+			 * 
+			 * @param Language newLanguage
+			 */
+			setLanguage: function(newLanguage) {
+				language = newLanguage;
+			},
+			/**
+			 * Set the audio format
+			 * 
+			 * @param string format
+			 */
+			setAudioformat: function(format) {
+				audioFormat = format;
+			},
+			/**
+			 * Get the audio URL
+			 * 
+			 * @return string
+			 */
+			getAudioURL: function() {
+				var actSt = this.getActive();
+				if (audioFormat === 'Lo') {
+					return actSt.audiourlAACPlusLo;
+				}
+				return actSt.audiourlWMPHd;
+			},
+			/**
+			 * Set the background
+			 */
+			setBackground: function() {
+				var actSt = this.getActive();
+				var gbg = document.getElementById('mainbackground');
+				gbg.className = actSt.classVal;
+				
+				if (System.Gadget.docked) {
+					gbg.src = 'url(' + actSt.backgroundImg + ')';
+				} else {
+					gbg.src = 'url(' + actSt.backgroundImgLarge + ')';
+				}
+			},
+			/**
+			 * Format the flyout
+			 */
+			formatFlyout: function() {
+				var actSt = this.getActive();
+				actSt.flyout = true;
+				var siteLinks = '<a href="' + actSt.url + '" title="' + language.visitHomepage + '">' + language.homepage + '</a><br />' +
+					'<a href="' + actSt.url + 'modules.php?name=Queue_Played" title="' + language.viewQueue + '">' + language.queue + '</a><br />' +
+					'<a href="' + actSt.url + 'modules.php?name=Requests" title="' + language.makeRequest + '">' + language.request + '</a><br />' +
+					'<a href="' + actSt.url + 'modules.php?name=Forums" title="' + language.visitForums + '">' + language.forums + '</a><br />' +
+					'<a href="' + actSt.url + 'modules.php?name=Donations" title="' + language.donations + '">' + language.donate + '</a><br />' +
+					actSt.listenercount + ' <a href="' + actSt.url + 'modules.php?name=Listen" title="' + language.moreListen + '">' + language.listeners + '</a>';
+				
+				var doc = System.Gadget.Flyout.document;
+				doc.getElementById('updatecontent').style.display = 'none';
+				doc.getElementById('linkscontent').style.display = 'block';
+				doc.getElementById('flyoutBackground').className = actSt.classVal;
+				doc.getElementById('flyoutBackground').src = 'url(' + actSt.backgroundImg + ')';
+				doc.getElementById('stationtitle').innerHTML = actSt.name;
+				doc.getElementById('siteLinks').innerHTML = siteLinks;
+			},
+			/**
+			 * Open the station flyout
+			 */
+			openFlyout: function() {
+				var actSt = this.getActive();
+				
+				if (System.Gadget.Flyout.show) {
+					if (actSt.flyout) {
+						return;
+					}
+					System.Gadget.Flyout.show = false;
+				}
+				
+				System.Gadget.Flyout.onShow = function() {
+					StationManager.getInstance().formatFlyout();
+				};
+				System.Gadget.Flyout.onHide = function() {
+					StationManager.getInstance().flyoutHidden();
+				};
+				System.Gadget.Flyout.show = true;
+			},
+			/**
+			 * Function called when the flyout is hidden
+			 */
+			flyoutHidden: function() {
+				var actSt = this.getActive();
+				actSt.flyout = false;
+			},
+			/**
+			 * Format the view
+			 */
+			formatView: function() {
+				var actSt = this.getActive();
+				if (actSt.album === 'Death.FM' || actSt.album == 'StationID') {
+					actSt.album = 'StationID';
+					actSt.commercial = true;
+				}
+				if (actSt.album !== '' && actSt.album !== 'StationID') {
+					document.getElementById('albumtitle').style.display = 'block';
+					if (actSt.link !== '') {
+						document.getElementById('albumtitle').innerHTML = '<a href="' + actSt.link + '" title="' + actSt.album + '">' + actSt.album + '</a>';
+					} else {
+						document.getElementById('albumtitle').innerHTML = '<span title="' + actSt.album + '">' + actSt.album + '</span>';
+					}
+				} else {
+					document.getElementById('albumtitle').style.display = 'none';
+					document.getElementById('albumtitle').innerHTML = '';
+				}
+				
+				if (actSt.artist !== '' && actSt.album !== 'StationID') {
+					document.getElementById('artistname').style.display = 'block';
+					document.getElementById('artistname').innerHTML = '<span title="' + actSt.artist + '">' + actSt.artist + '</span>';
+				} else {
+					document.getElementById('artistname').style.display = 'none';
+					document.getElementById('artistname').innerHTML = '';
+				}
+				
+				document.getElementById('busyText').innerHTML = actSt.busyText;
+				document.getElementById('errorText').innerHTML = actSt.errorText;
+				
+				if (actSt.url !== '') {
+					if (actSt.title !== '' && actSt.album !== 'StationID') {
+						document.getElementById('tracktitle').innerHTML = '<span title="' + actSt.title + '">' + actSt.title + '</span>';
+					} else if (actSt.album === 'StationID') {
+						document.getElementById('tracktitle').innerHTML = language.musicWillReturn;
+					} else {
+						document.getElementById('tracktitle').innerHTML = '';
+					}
+				}
+				if (actSt.cover !== '' && actSt.album !== 'StationID') {
+					document.getElementById('cover').innerHTML = '<img src="' + actSt.cover + '" alt="' + actSt.album + '" width="40" height="40" />';
+				} else {
+					document.getElementById('cover').innerHTML = '<img src="' + actSt.logo + '" alt="' + actSt.name + '" width="40" height="40" />';
+				}
+				
+				if (actSt.flyout && System.Gadget.Flyout.show) {
+					this.formatFlyout();
+				}
+				
+				if (actSt.url !== '') {
+					document.getElementById('introview').style.display = 'none';
+					document.getElementById('normalview').style.display = 'none';
+					document.getElementById('busyview').style.display = 'none';
+					document.getElementById('errorview').style.display = 'none';
+					if (actSt.errorText !== '') {
+						document.getElementById('errorview').style.display = 'block';
+					} else if (actSt.busyText !== '') {
+						document.getElementById('busyview').style.display = 'block';
+					} else {
+						document.getElementById('normalview').style.display = 'block';
+					}
+				}
+			},
+			/**
+			 * Get new data from the SOAP server
+			 */
+			getData: function() {
+				var actSt = this.getActive();
+				var now = new Date();
+				if (now.getTime() < actSt.nextUpdate) {
+					var diff = (actSt.nextUpdate - now.getTime());
+					if (diff < 5000) {
+						setTimeout(function() {
+								StationManager.getInstance().getData();
+							},
+							diff + 2000
+						);
+					}
+					return;
+				}
+				actSt.album = '';
+				actSt.artist = '';
+				actSt.title = '';
+				actSt.errorText = '';
+				actSt.busyText = language.busyLoading;
+				
+				this.formatView();
+				
+				SoapClient.getInstance().getData(
+					actSt.url + 'soap/FM24seven.php',
+					'current',
+					actSt.code,
+					function(data) {
+						StationManager.getInstance().handleSoapData(data);
+					}
+				);
+			},
+			/**
+			 * Handler for the data from the soap client
+			 * 
+			 * @param Object data
+			 */
+			handleSoapData: function(data) {
+				var actSt = this.getActive();
+				
+				var curSt = (actSt.code === data.station);
+				var now = new Date();
+				
+				switch (data.status) {
+				case 200:
+					break;
+					
+				case 400:
+					if (curSt) {
+						// Try again
+						setTimeout(function() {
+								StationManager.getInstance().getData();
+							},
+							1000
+						);
+					}
+					return;
+					
+				case 503:
+					// Timeout
+					if (curSt) {
+						actSt.album = '';
+						actSt.artist = '';
+						actSt.title = '';
+						actSt.errorText = language.serviceTimedOut;
+						actSt.busyText = '';
+						actSt.cover = '';
+						actSt.link = '';
+						actSt.commercial = true;
+						
+						this.formatView();
+						
+						setTimeout(function() {
+								StationManager.getInstance().getData();
+							},
+							61500
+						);
+					}
+					return;
+					
+				default:
+					if (curSt) {
+						actSt.artist = '';
+						actSt.album = '';
+						actSt.title = '';
+						actSt.errorText = language.serviceNotAvailable;
+						actSt.busyText = '';
+						actSt.cover = '';
+						actSt.commercial = true;
+						actSt.link = '';
+						this.formatView();
+						setTimeout(function() {
+								StationManager.getInstance().getData();
+							},
+							61500
+						);
+					}
+					return;
+				}
+				if (! curSt) {
+					actSt = this.getByCode(data.station);
+				}
+				
+				var xml = data.data;
+				
+				actSt.commercial = false;
+				var tracklength = 0;
+				var systemTime = new Date();
+				var playStart = new Date();
+				
+				if (xml.getElementsByTagName('Length').length !== 0 &&
+						xml.getElementsByTagName('Length')[0].childNodes.length !== 0) {
+					tracklength = parseInt(xml.getElementsByTagName('Length')[0].childNodes[0].nodeValue / 1000, 10);
+				}
+				if (xml.getElementsByTagName('PlayStart').length !== 0 &&
+						xml.getElementsByTagName('PlayStart')[0].childNodes.length !== 0) {
+					var playstartStr = xml.getElementsByTagName('PlayStart')[0].childNodes[0].nodeValue;
+					playStart.setYear(parseInt(playstartStr.substring(0, 4), 10));
+					playStart.setMonth(parseInt(playstartStr.substring(5, 7), 10) - 1);
+					playStart.setDate(parseInt(playstartStr.substring(8, 10), 10));
+					playStart.setHours(parseInt(playstartStr.substring(11, 13), 10));
+					playStart.setMinutes(parseInt(playstartStr.substring(14, 16), 10));
+					playStart.setSeconds(parseInt(playstartStr.substring(17, 19), 10));
+				}
+				if (xml.getElementsByTagName('SystemTime').length !== 0 &&
+						xml.getElementsByTagName('SystemTime')[0].childNodes.length !== 0) {
+					var systemTimeStr = xml.getElementsByTagName('SystemTime')[0].childNodes[0].nodeValue;
+					systemTime.setYear(parseInt(systemTimeStr.substring(0, 4), 10));
+					systemTime.setMonth(parseInt(systemTimeStr.substring(5, 7), 10) - 1);
+					systemTime.setDate(parseInt(systemTimeStr.substring(8, 10), 10));
+					systemTime.setHours(parseInt(systemTimeStr.substring(11, 13), 10));
+					systemTime.setMinutes(parseInt(systemTimeStr.substring(14, 16), 10));
+					systemTime.setSeconds(parseInt(systemTimeStr.substring(17, 19), 10));
+				}
+				var refresh = tracklength - parseInt((systemTime.getTime() - playStart.getTime()) / 1000, 10);
+				
+				if (refresh < -15) {
+					actSt.album = 'StationID';
+					actSt.commercial = true;
+					refresh = 60;
+				} else {
+					if (refresh < 0) {
+						refresh = 15;
+						actSt.commercial = true;
+					}
+					if (xml.getElementsByTagName('SiteLink').length !== 0 &&
+							xml.getElementsByTagName('SiteLink')[0].childNodes.length !== 0) {
+						actSt.link = xml.getElementsByTagName('SiteLink')[0].childNodes[0].nodeValue;
+					}
+					if (xml.getElementsByTagName('Album').length !== 0 &&
+							xml.getElementsByTagName('Album')[0].childNodes.length !== 0) {
+						actSt.album = xml.getElementsByTagName('Album')[0].childNodes[0].nodeValue;
+					}
+					if (xml.getElementsByTagName('Track').length !== 0 &&
+							xml.getElementsByTagName('Track')[0].childNodes.length !== 0) {
+						actSt.title = xml.getElementsByTagName('Track')[0].childNodes[0].nodeValue;
+					}
+					if (xml.getElementsByTagName('Artist').length !== 0 &&
+							xml.getElementsByTagName('Artist')[0].childNodes.length !== 0) {
+						actSt.artist = xml.getElementsByTagName('Artist')[0].childNodes[0].nodeValue;
+					}
+					if (xml.getElementsByTagName('CoverLink').length !== 0 &&
+							xml.getElementsByTagName('CoverLink')[0].childNodes.length !== 0) {
+						var coverurl = xml.getElementsByTagName('CoverLink')[0].childNodes[0].nodeValue;
+						actSt.cover = coverurl.replace(/cover\//, 'cover/040/');
+					}
+					if (xml.getElementsByTagName('ListenerCount').length !== 0 &&
+							xml.getElementsByTagName('ListenerCount')[0].childNodes.length !== 0) {
+						actSt.listenercount = parseInt(xml.getElementsByTagName('ListenerCount')[0].childNodes[0].nodeValue, 10);
+					}
+					actSt.errorText = '';
+					actSt.busyText = '';
+				}
+				actSt.nextUpdate = now.getTime() + refresh * 1000;
+				if (! curSt) {
+					return;
+				}
+				this.formatView();
+				if (! actSt.commercial) {
+					Countdown.getInstance().setEndtime(actSt.nextUpdate);
+				}
+				
+				setTimeout(function() {
+						StationManager.getInstance().getData();
+					},
+					((actSt.nextUpdate - now.getTime()) + 2000)
+				);
 			}
-			stObj.formatView();
-			stObj.nextUpdate = now.getTime() + refresh * 1000;
-			if (! stObj.commercial)
-			{
-				Countdown.getInstance().setEndtime(stObj.nextUpdate);
-			}
-			stObj.trackTimer = setTimeout(function () {
-				station_getSoapData(stObj.shortname);
-				return true;
-			}, ((stObj.nextUpdate - now.getTime()) + 2000));
 		};
-		this.xmlHttp.setRequestHeader("Content-type", "text/xml; charset=utf-8");
-		this.xmlHttp.setRequestHeader("SOAPAction", "\"urn:xmethods-delayed-quotes#GetCurrentlyPlaying\"");
-		this.xmlHttp.setRequestHeader("Content-length", soapReq.length);
-		this.xmlHttp.send(soapReq);
 	}
-	catch (e)
-	{
-		clearTimeout(this.timeoutTimer);
-		this.trackTimer = setTimeout(function () {
-			stObj.getSOAPdata();
-			return true;
-		}, 1000);
-	}
-};
-
-/**
- * Format the string to exclude HTML characters
- * 
- * @param	string	nw
- * @return	string
- */
-Station.prototype.stripHTML = function (nw) {
-	nw = nw.replace(/&amp;/gi, "&");
-	nw = nw.replace(/&gt;/gi, ">");
-	nw = nw.replace(/&lt;/gi, "<");
-	nw = nw.replace(/&([a|e|i|o|u])uml;/gi, "$1");
-	nw = nw.replace(/&([a|e|i|o|u])grave;/gi, "$1");
-	nw = nw.replace(/&([a|e|i|o|u])acute;/gi, "$1");
-	nw = nw.replace(/&([a|e|i|o|u])circ;/gi, "$1");
-	nw = nw.replace(/&([a|e|i|o|u])tilde;/gi, "$1");
-	nw = nw.replace(/&ccedil;/g, "c");
-	return nw;
-};
-
-/**
- * Format the view of the gadget
- * 
- * @return	void
- */
-Station.prototype.formatView = function ()
-{
-	if (this.album === "Death.FM" || this.album === "StationID")
-	{
-		this.album = "StationID";
-		this.commercial = true;
-	}
-	if (this.album !== "" && this.album !== "StationID")
-	{
-		document.getElementById("albumtitle").style.display = 'block';
-		document.getElementById("albumtitle").innerHTML = "<a href=\"http://www.amazon.com/exec/obidos/external-search/?mode=music&amp;tag=24fmll-20&amp;keyword=" + escape(this.stripHTML(this.album)) + "\" title=\"" + this.language.amazonAlbum + this.album + this.language.amazonLink + "\">" + this.album + "</a>";
-	}
-	else
-	{
-		document.getElementById("albumtitle").style.display = 'none';
-		document.getElementById("albumtitle").innerHTML = "";
-	}
-	if (this.artist !== "" && this.album !== "StationID")
-	{
-		document.getElementById("artistname").style.display = 'block';
-		document.getElementById("artistname").innerHTML = "<a href=\"http://www.amazon.com/exec/obidos/external-search/?mode=music&amp;tag=24fmll-20&amp;keyword=" + escape(this.stripHTML(this.artist)) + "\" title=\"" + this.language.amazonArtist + this.artist + this.language.amazonLink + "\">" + this.artist + "</a>";
-	}
-	else
-	{
-		document.getElementById("artistname").style.display = 'none';
-		document.getElementById("artistname").innerHTML = "";
-	}
-	document.getElementById("busyText").innerHTML = this.busyText;
-	document.getElementById("errorText").innerHTML = this.errorText;
-	if (this.url !== "")
-	{
-		if (this.title !== "" && this.album !== "StationID")
-		{
-			document.getElementById("tracktitle").innerHTML = "<span title=\"" + this.title + "\">" + this.title + "</a>";
+	
+	return {
+		/**
+		 * Get an instance of the StationMananger
+		 * 
+		 * @return StationManager
+		 */
+		getInstance: function() {
+			if (! instance) {
+				instance = init();
+			}
+			return instance;
 		}
-		else if (this.album === "StationID")
-		{
-			document.getElementById("tracktitle").innerHTML = this.language.musicWillReturn;
-		}
-		else
-		{
-			document.getElementById("tracktitle").innerHTML = "";
-		}
-	}
-	if (this.cover !== "" && this.album !== "StationID")
-	{
-		document.getElementById("cover").innerHTML = "<img src=\"" + this.cover + "\" alt=\"" + this.album + "\" width=\"40\" height=\"40\" />";
-	}
-	else
-	{
-		document.getElementById("cover").innerHTML = "<img src=\"" + this.logo + "\" alt=\"" + this.name + "\" />";
-	}
-	if (this.flyout && System.Gadget.Flyout.show)
-	{
-		this.formatFlyout();
-	}
-	if (this.url !== "")
-	{
-		document.getElementById("introview").style.display = 'none';
-		document.getElementById("normalview").style.display = 'none';
-		document.getElementById("busyview").style.display = 'none';
-		document.getElementById("errorview").style.display = 'none';
-		if (this.errorText !== "")
-		{
-			document.getElementById("errorview").style.display = 'block';
-		}
-		else if (this.busyText !== "")
-		{
-			document.getElementById("busyview").style.display = 'block';
-		}
-		else
-		{
-			document.getElementById("normalview").style.display = 'block';
-		}
-	}
-};
+	};
+})();
