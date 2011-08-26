@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * Copyright (C) 2008 - 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
  * 
  * This gadget is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,10 +36,16 @@ a:hover {
 	text-decoration: underline;
 }
 
+a img {
+	border: 0;
+}
+
 #flyoutBackground {
 	width: 100%;
-	padding: 3px 4px 4px 4px;
 	font: 9pt "Segoe UI";
+}
+#gadgetContent {
+	margin: 3px 4px 4px 4px;
 }
 
 #updatetitle,
@@ -146,3 +152,31 @@ a:hover {
 .stationsst a:hover {
 	color: #FFFF66;
 }
+
+.queueitem {
+	clear: both;
+	height: 40px;
+}
+
+.queueitem .queuelogo,
+.queueitem .queuetext_small {
+	float: left;
+}
+.queueitem .queuetext a,
+.queueitem .queuetext span {
+	width: 100%;
+	display: block;
+	overflow: hidden;
+	height: 20px;
+	line-height: 17px;
+}
+
+.queueitem .small {
+	margin-left: 2px;
+}
+
+.queueitem .small a,
+.queueitem .small span {
+	width: 80px;
+}
+
