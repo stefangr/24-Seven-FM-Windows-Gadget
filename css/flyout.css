@@ -42,7 +42,8 @@ a:hover {
 	font: 9pt "Segoe UI";
 }
 
-#updatetitle {
+#updatetitle,
+#queuetitle {
 	font-weight: bold;
 }
 
