@@ -61,4 +61,6 @@ function Language()
 	this.updateWeek = "Once a week";
 	this.updateMonth = "Once a month";
 	this.updateNever = "Never";
+	this.pastRequests = "Played tracks";
+	this.futureRequests = "Queued tracks";
 }

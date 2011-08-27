@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * Copyright (C) 2008 - 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
  * 
  * This gadget is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +38,13 @@ a:hover {
 
 #mainbackground {
 	width: 100%;
-	padding: 3px 4px 4px 3px;
+	height: 100%;
 	font: 9pt "Segoe UI";
+}
+
+#mainwrapper {
+	margin: 3px 4px 4px 3px;
+	position: relative;
 }
 
 .infoIcon {
@@ -56,45 +61,59 @@ a:hover {
 	background-image: url(/img/busy_ani.png);
 	background-position-y: top;
 }
-
-.docked #minibar {
-	display: block;
-}
-
-.undocked #minibar {
+.undocked #minitabs {
 	display: none;
 }
-
-#minitabs {
+.docked #minitabs {
 	position: absolute;
-	top: 6px;
-	right: 8px;
+	top: 4px;
+	right: 6px;
 	border: 1px solid #666;
 	padding: 2px 1px;
 	background-color: white;
 	font-family: "Calibri";
 }
 
-#tabopen {
+.docked #tabopen {
 	float: right;
-	margin: 4px 4px;
+	margin: 4px 4px 0 0;
 }
 
-#minititle {
-	text-align: center;
-}
-
-.docked #bigtitle {
+.undocked #tabopen {
 	display: none;
 }
 
-.undocked #bigtitle {
-	width: 100%;
+#queue_prev {
+	float: left;
+	margin: 4px 0 0 4px;
+	width: 13px;
+	height: 13px;
+}
+.docked #title_text {
 	text-align: center;
+	float: left;
+	width: 76px;
+	margin-top: 4px;
+}
+.undocked #title_text {
+	text-align: center;
+	float: left;
+	width: 258px;
+}
+#queue_next {
+	float: left;
+	margin: 4px 4px 0 0;
+	width: 13px;
+	height: 13px;
+}
+#barcontent {
+	width: 100%;
+}
+.undocked #barcontent {
 	height: 23px;
+	text-align: center;
 	font-size: 11pt;
 }
-
 .docked #bigtabs {
 	display: none;
 }
@@ -103,7 +122,12 @@ a:hover {
 	height: 20px;
 }
 
-#bar2.undocked {
+#bigtabs div {
+	float: left;
+	text-align: center;
+}
+
+.undocked #bar2 {
 	float: left;
 	width: 50px;
 }
@@ -389,4 +413,7 @@ a:hover {
 
 #mtab_sst, #btab_sst {
 	color: #99CCFF;
+}
+.clear {
+	clear: both;
 }

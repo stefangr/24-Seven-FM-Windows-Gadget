@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2008 Stefan Grootscholten <stefan.grootscholten@gmail.com>
+ * Copyright (C) 2008 - 2011 Stefan Grootscholten <stefan.grootscholten@gmail.com>
  * 
  * This gadget is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,4 +61,6 @@ function Language()
 	this.updateWeek = "Een keer per week";
 	this.updateMonth = "Een keer per maand";
 	this.updateNever = "Nooit";
+	this.pastRequests = "Beluisterde tracks";
+	this.futureRequests = "Tracks in de wachtrij";
 }

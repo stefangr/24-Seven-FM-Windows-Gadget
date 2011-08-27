@@ -132,10 +132,10 @@ var SoapClient = (function() {
 				}
 				
 				if (this.status != 200) {
-					callback({status: this.status, station: code});
+					callback({status: this.status, station: code, action: action});
 				} else {
 					var xml = this.responseXML;
-					callback({status: 200, station: code, data: xml});
+					callback({status: 200, station: code, action: action, data: xml});
 				}
 				xmlHTTP.onreadystatechange = null;
 			};
@@ -145,7 +145,7 @@ var SoapClient = (function() {
 				// Try for 30 seconds
 				xmlTimeout = setTimeout(function() {
 						xmlHTTP.abort();
-						callback({status: 503, station: code});
+						callback({status: 503, station: code, action: action});
 					},
 					30000
 				);
@@ -156,7 +156,7 @@ var SoapClient = (function() {
 			} catch (e) {
 				xmlHTTP.onreadystatechange = null;
 				clearTimeout(xmlTimeout);
-				callback({status: 400, station: code});
+				callback({status: 400, station: code, action: action});
 			}
 		}
 		
@@ -186,6 +186,23 @@ var SoapClient = (function() {
 				instance = init();
 			}
 			return instance;
+		},
+		/**
+		 * Extract the first text item from the XML
+		 * 
+		 * @param XMLDocument thexml
+		 * @param string tag
+		 * @param string def
+		 * 
+		 * @return string
+		 */
+		extractData: function(thexml, tag, def) {
+			def = def || '';
+			if (thexml.getElementsByTagName(tag).length === 0 ||
+					thexml.getElementsByTagName(tag)[0].childNodes.length === 0) {
+				return def;
+			}
+			return thexml.getElementsByTagName(tag)[0].childNodes[0].nodeValue;
 		}
 	}
 })();

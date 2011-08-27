@@ -129,7 +129,7 @@ var UpdateCheck = (function() {
 				}
 			};
 			try {
-				xhr.open('GET', 'https://raw.github.com/stefangr/24-Seven-FM-Windows-Gadget/master/24sevenfm_update.xml', 'true');
+				xhr.open('GET', 'http://24seven-fm-gadgets.googlecode.com/svn/trunk/24sevenfm_update.xml', true);
 				// Try 30 seconds to get the resource
 				setTimeout(function() {
 						xhr.abort();
@@ -153,14 +153,6 @@ var UpdateCheck = (function() {
 		 */
 		function setNewLanguage(newLanguage) {
 			language = newLanguage;
-			document.getElementById('updateButton').title = language.updateAvailable;
-			document.getElementById('updateImage').alt = language.updateAvailable;
-			EventManager.Add('updateButton', 'click', function() {
-				var e = window.event;
-				e.cancelBubble = true;
-				UpdateCheck.getInstance().openFlyout();
-				e.returnValue = false;
-			});
 			curversion = System.Gadget.version;
 			checkForUpdates();
 		}
@@ -169,11 +161,22 @@ var UpdateCheck = (function() {
 		 * Enable the update button
 		 */
 		function enableUpdate() {
+			document.getElementById('updateButton').title = language.updateAvailable;
+			document.getElementById('updateImage').alt = language.updateAvailable;
+			
+			EventManager.Add('updateButton', 'click', function() {
+				var e = window.event;
+				e.cancelBubble = true;
+				UpdateCheck.getInstance().openFlyout();
+				e.returnValue = false;
+			});
+			
 			if (updateUrl.indexOf('?') === -1) {
 				updateUrl += '?';
 			} else {
 				updateUrl += '&';
 			}
+			
 			updateUrl += 'utm_source=update_' + language.name + '&amp;utm_medium=gadget&amp;utm_campaign=24sevenfmGadget&amp;utm_content=' + curversion;
 			document.getElementById('updatedisabled').style.display = 'none';
 			document.getElementById('updateenabled').style.display = 'block';
@@ -243,6 +246,7 @@ var UpdateCheck = (function() {
 				flyout = true;
 				var doc = System.Gadget.Flyout.document;
 				doc.getElementById('linkscontent').style.display = 'none';
+				doc.getElementById('queuecontent').style.display = 'none';
 				doc.getElementById('updatecontent').style.display = 'block';
 				doc.getElementById('flyoutBackground').className = classVal;
 				doc.getElementById('flyoutBackground').src = 'url(' + backgroundImg + ')';

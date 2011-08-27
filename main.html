@@ -32,65 +32,72 @@
 </head>
 <body onload="init()">
 	<g:background id="mainbackground">
-		<div id="bar1">
-			<div id="minitabs"></div>
-			<div id="bigtabs"></div>
-			<div id="minibar">
-				<div id="tabopen">
-					<a href="#" id="tabopenlink">
-						<img src="/img/menu_down.png" width="9" height="9" alt="" />
-					</a>
-				</div>
-				<div id="minititle"></div>
-			</div>
-			<div id="bigtitle"></div>
-		</div>
-		<div id="bar2">
-			<div id="cover"></div>
-			<div id="butcd">
-				<div id="countdownTimer"></div>
-				<div id="buttons">
-					<div id="updateButton">
-						<div id="updateenabled" class="updatediv">
-							<a href="#" id="updateButton" title="">
-								<img src="/img/update/enabled.png" width="13" height="13" alt="" id="updateImage" />
-							</a>
-						</div>
-						<div id="updatedisabled" class="updatediv">
-							<img src="/img/update/disabled.png" width="13" height="13" alt="" />
-						</div>
+		<div id="mainwrapper">
+			<div id="bar1">
+				<div id="minitabs"></div>
+				<div id="bigtabs"></div>
+				<div id="barcontent">
+					<div id="tabopen">
+						<a href="#" id="tabopenlink">
+							<img src="/img/menu_down.png" width="9" height="9" alt="" />
+						</a>
 					</div>
-					<div id="radioButtons">
-						<div id="playenabled" class="playdiv"></div>
-						<div id="playdisabled" class="playdiv"></div>
-						<div id="stopenabled" class="stopdiv"></div>
-						<div id="stopdisabled" class="stopdiv"></div>
-						<div id="muteenabled" class="mutediv"></div>
-						<div id="mutedisabled" class="mutediv"></div>
+					<div id="title">
+						<div id="queue_prev"></div>
+						<div id="title_text"></div>
+						<div id="queue_next"></div>
+						<div class="clear"></div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div id="content">
-			<div id="introview">
-				<div id="introText"></div>
-			</div>
-			<div id="normalview">
-				<div id="albumtitle"></div>
-				<div id="artistname"></div>
-				<div id="tracktitle"></div>
-			</div>
-			<div id="busyview">
-				<div class="infoIcon">
-					<div id="busyIcon"></div>
+			<div id="bar2">
+				<div id="cover"></div>
+				<div id="butcd">
+					<div id="countdownTimer"></div>
+					<div id="buttons">
+						<div id="updateButton">
+							<div id="updateenabled" class="updatediv">
+								<a href="#" id="updateButton" title="">
+									<img src="/img/update/enabled.png" width="13" height="13" alt="" id="updateImage" />
+								</a>
+							</div>
+							<div id="updatedisabled" class="updatediv">
+								<img src="/img/update/disabled.png" width="13" height="13" alt="" />
+							</div>
+						</div>
+						<div id="radioButtons">
+							<div id="playenabled" class="playdiv"></div>
+							<div id="playdisabled" class="playdiv"></div>
+							<div id="stopenabled" class="stopdiv"></div>
+							<div id="stopdisabled" class="stopdiv"></div>
+							<div id="muteenabled" class="mutediv"></div>
+							<div id="mutedisabled" class="mutediv"></div>
+						</div>
+					</div>
 				</div>
-				<span id="busyText"></span>
+				<div class="clear"></div>
 			</div>
-			<div id="errorview">
-				<div class="infoIcon">
-					<img src="/img/information.png" alt="" id="errorIcon" />
+			<div id="content">
+				<div id="introview">
+					<div id="introText"></div>
 				</div>
-				<span id="errortext"></span>
+				<div id="normalview">
+					<div id="albumtitle"></div>
+					<div id="artistname"></div>
+					<div id="tracktitle"></div>
+				</div>
+				<div id="busyview">
+					<div class="infoIcon">
+						<div id="busyIcon"></div>
+					</div>
+					<span id="busyText"></span>
+				</div>
+				<div id="errorview">
+					<div class="infoIcon">
+						<img src="/img/information.png" alt="" id="errorIcon" />
+					</div>
+					<span id="errortext"></span>
+				</div>
 			</div>
 		</div>
 	</g:background>

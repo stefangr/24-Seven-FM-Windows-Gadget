@@ -34,6 +34,7 @@ var Station = (function() {
 		this.active = false;
 		this.commercial = false;
 		this.flyout = false;
+		this.flyoutType = '';
 		this.album = '';
 		this.artist = '';
 		this.title = '';
@@ -41,6 +42,26 @@ var Station = (function() {
 		this.link = '';
 		this.errorText = '';
 		this.busyText = '';
+		/**
+		 * Type of queue in the flyout
+		 * 
+		 * @var string
+		 */
+		this.queuetype = '';
+		
+		/**
+		 * Queue items
+		 * 
+		 * @var array
+		 */
+		this.queueitems = [];
+		
+		/**
+		 * History items
+		 * 
+		 * @var array
+		 */
+		this.historyitems = [];
 	};
 	
 	return function(name, code, logo, url, listenurl, id) {
@@ -101,7 +122,7 @@ var StationManager = (function() {
 				var perc = parseInt(95 / total, 10);
 				var bightml = minihtml = '';
 				for (var x = 1; x < stations.length; x++) {
-					bightml += '<div style="float: left; text-align: center; width: ' + perc + '%;"><a href="#" id="btab_' + stations[x].code.toLowerCase() + '" class="tab_' + stations[x].code.toLowerCase() + '" title="' + stations[x].name + '">' + stations[x].code + '</a></div>';
+					bightml += '<div style="width: ' + perc + '%;"><a href="#" id="btab_' + stations[x].code.toLowerCase() + '" class="tab_' + stations[x].code.toLowerCase() + '" title="' + stations[x].name + '">' + stations[x].code + '</a></div>';
 					minihtml += (minihtml !== '' ? '<br />' : '') + '<a href="#" id="mtab_' + stations[x].code.toLowerCase() + '" class="tab_' + stations[x].code.toLowerCase() + '" title="' + stations[x].name + '">' + stations[x].code + '</a>';
 				}
 				document.getElementById('bigtabs').innerHTML = bightml;
@@ -180,8 +201,7 @@ var StationManager = (function() {
 				if (actSt !== null && actSt.code === code) {
 					return;
 				} else if (actSt !== null) {
-					EventManager.Remove('miniLinks', 'click');
-					EventManager.Remove('bigLinks', 'click');
+					EventManager.Remove('infoLink', 'click');
 					actSt.active = false;
 				}
 				
@@ -194,32 +214,32 @@ var StationManager = (function() {
 				
 				System.Gadget.Flyout.show = false;
 				actSt.flyout = false;
+				actSt.flyoutType = '';
 				
-				this.setBackground();
-				
-				var minititle = document.getElementById('minititle');
-				var bigtitle = document.getElementById('bigtitle');
-				if (actSt.url === '') {
-					minititle.innerHTML = actSt.code;
-					bigtitle.innerHTML = actSt.name;
+				if (System.Gadget.docked) {
+					this.dock(actSt);
 				} else {
-					minititle.innerHTML = '<a href="#" id="miniLinks">' + actSt.code + '</a>';
-					bigtitle.innerHTML = '<a href="#" id="bigLinks">' + actSt.name + '</a>';
-					EventManager.Add('miniLinks', 'click', function () {
+					this.undock(actSt);
+				}
+				
+				if (actSt.url !== '') {
+					document.getElementById('queue_prev').innerHTML = '<a href="#" title="' + language.pastRequests + '" id="queue_prev_link"><img src="/img/queue/left.png" width="13" height="13" alt="' + language.pastRequests + '" /></a>';
+					document.getElementById('queue_next').innerHTML = '<a href="#" title="' + language.futureRequests + '" id="queue_next_link"><img src="/img/queue/right.png" width="13" height="13" alt="' + language.futureRequests + '" /></a>';
+					EventManager.Add('queue_prev_link', 'click', function() {
 						var e = window.event;
 						e.cancelBubble = true;
-						StationManager.getInstance().openFlyout();
+						StationManager.getInstance().getQueueData('history');
 						e.returnValue = false;
 					});
-					EventManager.Add('bigLinks', 'click', function () {
+					EventManager.Add('queue_next_link', 'click', function() {
 						var e = window.event;
 						e.cancelBubble = true;
-						StationManager.getInstance().openFlyout();
+						StationManager.getInstance().getQueueData('queue');
 						e.returnValue = false;
 					});
 				}
 				
-				this.formatView();
+				this.formatView(actSt);
 			},
 			/**
 			 * Check if a station is the active station
@@ -261,25 +281,12 @@ var StationManager = (function() {
 				return actSt.audiourlWMPHd;
 			},
 			/**
-			 * Set the background
+			 * Format the Info flyout
 			 */
-			setBackground: function() {
-				var actSt = this.getActive();
-				var gbg = document.getElementById('mainbackground');
-				gbg.className = actSt.classVal;
-				
-				if (System.Gadget.docked) {
-					gbg.src = 'url(' + actSt.backgroundImg + ')';
-				} else {
-					gbg.src = 'url(' + actSt.backgroundImgLarge + ')';
-				}
-			},
-			/**
-			 * Format the flyout
-			 */
-			formatFlyout: function() {
+			formatInfoFlyout: function() {
 				var actSt = this.getActive();
 				actSt.flyout = true;
+				actSt.flyoutType = 'info';
 				var siteLinks = '<a href="' + actSt.url + '" title="' + language.visitHomepage + '">' + language.homepage + '</a><br />' +
 					'<a href="' + actSt.url + 'modules.php?name=Queue_Played" title="' + language.viewQueue + '">' + language.queue + '</a><br />' +
 					'<a href="' + actSt.url + 'modules.php?name=Requests" title="' + language.makeRequest + '">' + language.request + '</a><br />' +
@@ -289,6 +296,7 @@ var StationManager = (function() {
 				
 				var doc = System.Gadget.Flyout.document;
 				doc.getElementById('updatecontent').style.display = 'none';
+				doc.getElementById('queuecontent').style.display = 'none';
 				doc.getElementById('linkscontent').style.display = 'block';
 				doc.getElementById('flyoutBackground').className = actSt.classVal;
 				doc.getElementById('flyoutBackground').src = 'url(' + actSt.backgroundImg + ')';
@@ -296,20 +304,81 @@ var StationManager = (function() {
 				doc.getElementById('siteLinks').innerHTML = siteLinks;
 			},
 			/**
+			 * Format the queue/history flyout
+			 * 
+			 */
+			formatQueueFlyout: function() {
+				var actSt = this.getActive();
+				actSt.flyout = true;
+				actSt.flyoutType = actSt.queuetype;
+				
+				var doc = System.Gadget.Flyout.document;
+				if (actSt.queuetype === 'history') {
+					doc.getElementById('queuetitle').innerHTML = language.pastRequests;
+				} else {
+					doc.getElementById('queuetitle').innerHTML = language.futureRequests;
+				}
+				
+				var queueLinks = '';
+				var queueitems = actSt.queuetype === 'history' ? actSt.historyitems : actSt.queueitems;
+				for (var x = 0; x < queueitems.length; x++) {
+					var logo = '';
+					var extraclass = '';
+					if (queueitems[x].cover !== '') {
+						logo = '<div class="queuelogo"><a href="' + queueitems[x].link + '" title="' + queueitems[x].album + '"><img src="' + queueitems[x].cover + '" width="40" height="40" alt="' + queueitems[x].album + '" /></a></div>';
+						extraclass = ' small';
+					}
+					queueLinks += '<div class="queueitem">' + logo + '<div class="queuetext' + extraclass + '"><a href="' + queueitems[x].link + '" title="' + queueitems[x].album + '">' + queueitems[x].album + '</a><span title="' + queueitems[x].title + '">' + queueitems[x].title + '</span></div></div>';
+				}
+				doc.getElementById('linkscontent').style.display = 'none';
+				doc.getElementById('updatecontent').style.display = 'none';
+				doc.getElementById('queuecontent').style.display = 'block';
+				doc.getElementById('queuelinks').innerHTML = queueLinks;
+				doc.getElementById('flyoutBackground').className = actSt.classVal;
+				doc.getElementById('flyoutBackground').src = 'url(' + actSt.backgroundImg + ')';
+			},
+			/**
 			 * Open the station flyout
 			 */
-			openFlyout: function() {
+			openInfoFlyout: function() {
 				var actSt = this.getActive();
 				
 				if (System.Gadget.Flyout.show) {
-					if (actSt.flyout) {
+					if (actSt.flyout && actSt.flyoutType === 'info') {
 						return;
 					}
 					System.Gadget.Flyout.show = false;
 				}
 				
 				System.Gadget.Flyout.onShow = function() {
-					StationManager.getInstance().formatFlyout();
+					StationManager.getInstance().formatInfoFlyout();
+				};
+				System.Gadget.Flyout.onHide = function() {
+					StationManager.getInstance().flyoutHidden();
+				};
+				System.Gadget.Flyout.show = true;
+			},
+			/**
+			 * Open the queue flyout
+			 */
+			openQueueFlyout: function(actSt) {
+				actSt = actSt || this.getActive();
+				
+				if ((actSt.queuetype === 'history' && actSt.historyitems.length === 0) ||
+					(actSt.queuetype === 'queue' && actSt.queueitems.length === 0)
+				) {
+					return;
+				}
+				
+				if (System.Gadget.Flyout.show) {
+					if (actSt.flyout && actSt.flyoutType === actSt.queuetype) {
+						return;
+					}
+					System.Gadget.Flyout.show = false;
+				}
+				
+				System.Gadget.Flyout.onShow = function() {
+					StationManager.getInstance().formatQueueFlyout();
 				};
 				System.Gadget.Flyout.onHide = function() {
 					StationManager.getInstance().flyoutHidden();
@@ -326,8 +395,8 @@ var StationManager = (function() {
 			/**
 			 * Format the view
 			 */
-			formatView: function() {
-				var actSt = this.getActive();
+			formatView: function(actSt) {
+				actSt = actSt || this.getActive();
 				if (actSt.album === 'Death.FM' || actSt.album == 'StationID') {
 					actSt.album = 'StationID';
 					actSt.commercial = true;
@@ -418,7 +487,31 @@ var StationManager = (function() {
 					'current',
 					actSt.code,
 					function(data) {
-						StationManager.getInstance().handleSoapData(data);
+						StationManager.getInstance().handleCurrentData(data);
+					}
+				);
+			},
+			/**
+			 * Get the data for the queue
+			 */
+			getQueueData: function(queuetype) {
+				var actSt = this.getActive();
+				
+				actSt.queuetype = queuetype;
+				
+				if ((queuetype === 'history' && actSt.historyitems.length > 0) ||
+					(queuetype === 'queue' && actSt.queueitems.length > 0)
+				) {
+					this.openQueueFlyout(actSt);
+					return;
+				}
+				
+				SoapClient.getInstance().getData(
+					actSt.url + 'soap/FM24seven.php',
+					queuetype,
+					actSt.code,
+					function(data) {
+						StationManager.getInstance().handleQueueData(data);
 					}
 				);
 			},
@@ -427,7 +520,7 @@ var StationManager = (function() {
 			 * 
 			 * @param Object data
 			 */
-			handleSoapData: function(data) {
+			handleCurrentData: function(data) {
 				var actSt = this.getActive();
 				
 				var curSt = (actSt.code === data.station);
@@ -493,20 +586,18 @@ var StationManager = (function() {
 					actSt = this.getByCode(data.station);
 				}
 				
+				actSt.queueitems = [];
+				actSt.historyitems = [];
+				
 				var xml = data.data;
 				
 				actSt.commercial = false;
-				var tracklength = 0;
+				var tracklength = parseInt(SoapClient.extractData(xml, 'Length', 0) / 1000, 10);
 				var systemTime = new Date();
 				var playStart = new Date();
 				
-				if (xml.getElementsByTagName('Length').length !== 0 &&
-						xml.getElementsByTagName('Length')[0].childNodes.length !== 0) {
-					tracklength = parseInt(xml.getElementsByTagName('Length')[0].childNodes[0].nodeValue / 1000, 10);
-				}
-				if (xml.getElementsByTagName('PlayStart').length !== 0 &&
-						xml.getElementsByTagName('PlayStart')[0].childNodes.length !== 0) {
-					var playstartStr = xml.getElementsByTagName('PlayStart')[0].childNodes[0].nodeValue;
+				var playstartStr = SoapClient.extractData(xml, 'PlayStart', '');
+				if (playstartStr !== '') {
 					playStart.setYear(parseInt(playstartStr.substring(0, 4), 10));
 					playStart.setMonth(parseInt(playstartStr.substring(5, 7), 10) - 1);
 					playStart.setDate(parseInt(playstartStr.substring(8, 10), 10));
@@ -514,9 +605,8 @@ var StationManager = (function() {
 					playStart.setMinutes(parseInt(playstartStr.substring(14, 16), 10));
 					playStart.setSeconds(parseInt(playstartStr.substring(17, 19), 10));
 				}
-				if (xml.getElementsByTagName('SystemTime').length !== 0 &&
-						xml.getElementsByTagName('SystemTime')[0].childNodes.length !== 0) {
-					var systemTimeStr = xml.getElementsByTagName('SystemTime')[0].childNodes[0].nodeValue;
+				var systemTimeStr = SoapClient.extractData(xml, 'SystemTime', '');
+				if (systemTimeStr !== '') {
 					systemTime.setYear(parseInt(systemTimeStr.substring(0, 4), 10));
 					systemTime.setMonth(parseInt(systemTimeStr.substring(5, 7), 10) - 1);
 					systemTime.setDate(parseInt(systemTimeStr.substring(8, 10), 10));
@@ -535,31 +625,12 @@ var StationManager = (function() {
 						refresh = 15;
 						actSt.commercial = true;
 					}
-					if (xml.getElementsByTagName('SiteLink').length !== 0 &&
-							xml.getElementsByTagName('SiteLink')[0].childNodes.length !== 0) {
-						actSt.link = xml.getElementsByTagName('SiteLink')[0].childNodes[0].nodeValue;
-					}
-					if (xml.getElementsByTagName('Album').length !== 0 &&
-							xml.getElementsByTagName('Album')[0].childNodes.length !== 0) {
-						actSt.album = xml.getElementsByTagName('Album')[0].childNodes[0].nodeValue;
-					}
-					if (xml.getElementsByTagName('Track').length !== 0 &&
-							xml.getElementsByTagName('Track')[0].childNodes.length !== 0) {
-						actSt.title = xml.getElementsByTagName('Track')[0].childNodes[0].nodeValue;
-					}
-					if (xml.getElementsByTagName('Artist').length !== 0 &&
-							xml.getElementsByTagName('Artist')[0].childNodes.length !== 0) {
-						actSt.artist = xml.getElementsByTagName('Artist')[0].childNodes[0].nodeValue;
-					}
-					if (xml.getElementsByTagName('CoverLink').length !== 0 &&
-							xml.getElementsByTagName('CoverLink')[0].childNodes.length !== 0) {
-						var coverurl = xml.getElementsByTagName('CoverLink')[0].childNodes[0].nodeValue;
-						actSt.cover = coverurl.replace(/cover\//, 'cover/040/');
-					}
-					if (xml.getElementsByTagName('ListenerCount').length !== 0 &&
-							xml.getElementsByTagName('ListenerCount')[0].childNodes.length !== 0) {
-						actSt.listenercount = parseInt(xml.getElementsByTagName('ListenerCount')[0].childNodes[0].nodeValue, 10);
-					}
+					actSt.link = SoapClient.extractData(xml, 'SiteLink', '');
+					actSt.album = SoapClient.extractData(xml, 'Album', '');
+					actSt.title = SoapClient.extractData(xml, 'Track', '');
+					actSt.artist = SoapClient.extractData(xml, 'Artist', '');
+					actSt.cover = SoapClient.extractData(xml, 'CoverLink', '').replace(/cover\//, 'cover/040/');
+					actSt.listenercount = parseInt(SoapClient.extractData(xml, 'ListenerCount', 0), 10);
 					actSt.errorText = '';
 					actSt.busyText = '';
 				}
@@ -577,6 +648,85 @@ var StationManager = (function() {
 					},
 					((actSt.nextUpdate - now.getTime()) + 2000)
 				);
+			},
+			/**
+			 * Handle the SOAP response for the queue or history data
+			 * 
+			 * @param Object data
+			 */
+			handleQueueData: function(data) {
+				if (data.status !== 200) {
+					return;
+				}
+				var actSt = this.getByCode(data.station);
+				if (data.action === 'history') {
+					actSt.historyitems = [];
+				} else {
+					actSt.queueitems = [];
+				}
+				
+				var xml = data.data;
+				
+				var queueitems = [];
+				
+				for (x = 0; x < xml.getElementsByTagName('item').length; x++) {
+					var item = xml.getElementsByTagName('item')[x];
+					queueitems[x] = {
+						album: SoapClient.extractData(item, 'Album', ''),
+						title: SoapClient.extractData(item, 'Track', ''),
+						cover: SoapClient.extractData(item, 'CoverLink', ''),
+						link: SoapClient.extractData(item, 'SiteLink', ''),
+						requester: SoapClient.extractData(item, 'RequestedBy', '')
+					};
+				}
+				if (data.action === 'history') {
+					actSt.historyitems = queueitems;
+				} else {
+					actSt.queueitems = queueitems;
+				}
+				StationManager.getInstance().openQueueFlyout();
+			},
+			/**
+			 * Function called when the gadget is docked
+			 */
+			dock: function(actSt) {
+				actSt = actSt || this.getActive();
+				var title = document.getElementById('title_text');
+				if (actSt.url === '') {
+					title.innerHTML = actSt.code;
+				} else {
+					title.innerHTML = '<a href="#" id="infoLink">' + actSt.code + '</a>';
+					EventManager.Add('infoLink', 'click', function () {
+						var e = window.event;
+						e.cancelBubble = true;
+						StationManager.getInstance().openInfoFlyout();
+						e.returnValue = false;
+					});
+				}
+				var gbg = document.getElementById('mainbackground');
+				gbg.className = actSt.classVal;
+				gbg.src = 'url(' + actSt.backgroundImg + ')';
+			},
+			/**
+			 * Function called when the gadget is undocked
+			 */
+			undock: function(actSt) {
+				actSt = actSt || this.getActive();
+				var title = document.getElementById('title_text');
+				if (actSt.url === '') {
+					title.innerHTML = actSt.name;
+				} else {
+					title.innerHTML = '<a href="#" id="infoLink">' + actSt.name + '</a>';
+					EventManager.Add('infoLink', 'click', function () {
+						var e = window.event;
+						e.cancelBubble = true;
+						StationManager.getInstance().openInfoFlyout();
+						e.returnValue = false;
+					});
+				}
+				var gbg = document.getElementById('mainbackground');
+				gbg.className = actSt.classVal;
+				gbg.src = 'url(' + actSt.backgroundImgLarge + ')';
 			}
 		};
 	}

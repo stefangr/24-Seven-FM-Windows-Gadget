@@ -57,7 +57,7 @@ var RadioGadget = (function() {
 		 * 
 		 * @var Language
 		 */
-		var language = new Language();
+		var language = null;
 		
 		/**
 		 * Interval ID
@@ -134,6 +134,7 @@ var RadioGadget = (function() {
 		 * Initialize the gadget
 		 */
 		function initGadget() {
+			language = new Language();
 			System.Gadget.onUndock = function() {
 				RadioGadget.getInstance().undock();
 			};
@@ -204,25 +205,19 @@ var RadioGadget = (function() {
 			 * Function called on dock event
 			 */
 			dock: function() {
-				document.getElementById('minibar').style.display = 'block';
-				document.getElementById('bar1').className = 'docked';
-				document.getElementById('bar2').className = 'docked';
-				document.getElementById('content').className = 'docked';
+				document.getElementById('mainwrapper').className = 'docked';
 				document.getElementsByTagName('body')[0].style.width = '130px';
 				document.getElementById('mainbackground').style.width = '100%';
-				StationManager.getInstance().setBackground();
+				StationManager.getInstance().dock();
 			},
 			/**
 			 * Function called on undock event
 			 */
 			undock: function() {
-				document.getElementById('minibar').style.display = 'none';
-				document.getElementById('bar1').className = 'undocked';
-				document.getElementById('bar2').className = 'undocked';
-				document.getElementById('content').className = 'undocked';
+				document.getElementById('mainwrapper').className = 'undocked';
 				document.getElementsByTagName('body')[0].style.width = '300px';
 				document.getElementById('mainbackground').style.width = '100%';
-				StationManager.getInstance().setBackground();
+				StationManager.getInstance().undock();
 			},
 			/**
 			 * Function to read the (new) settings
